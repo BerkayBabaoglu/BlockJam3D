@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+
 public class GridEditorWindow : EditorWindow
 {
     private GridData gridData;
@@ -12,7 +13,7 @@ public class GridEditorWindow : EditorWindow
     private const float cellSize = 25f;
 
     [MenuItem("Tools/Grid Level Editor")]
-    public static void ShowWindos()
+    public static void ShowWindow()
     {
         GetWindow<GridEditorWindow>("Grid Level Editor");
     }
@@ -26,63 +27,86 @@ public class GridEditorWindow : EditorWindow
     {
         EditorGUILayout.LabelField("Grid Level Editor", EditorStyles.boldLabel);
         EditorGUILayout.Space();
-        
+
         cellsX = EditorGUILayout.IntField("Cells X", cellsX);
         cellsZ = EditorGUILayout.IntField("Cells Z", cellsZ);
-
         jsonPath = EditorGUILayout.TextField("JSON Path", jsonPath);
 
-        if(GUILayout.Button("New Grid"))
+        if (GUILayout.Button("New Grid"))
         {
             gridData = new GridData(cellsX, cellsZ);
         }
 
-        if(gridData == null)
+        if (gridData != null)
         {
-            EditorGUILayout.HelpBox("Grid data yok.  New grid yap veya json yukle", MessageType.Info);
-            return;
-        }
-
-        if (gridData.cellsX != cellsX || gridData.cellsZ != cellsZ)
-        {
-            gridData = new GridData(cellsX, cellsZ);
-        }
-
-        scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(400));
-
-        for (int z = gridData.cellsZ - 1; z >= 0; z--)
-        {
-            EditorGUILayout.BeginHorizontal();
-            for (int x = 0; x < gridData.cellsX; x++)
+            if (gridData.cellsX != cellsX || gridData.cellsZ != cellsZ)
             {
-                bool cellValue = gridData.GetCell(x, z);
-                GUIStyle style = new GUIStyle(GUI.skin.button);
-                style.normal.textColor = cellValue ? Color.green : Color.red;
+                gridData = new GridData(cellsX, cellsZ);
+            }
 
-                if (GUILayout.Button(cellValue ? "1" : "0", style, GUILayout.Width(cellSize), GUILayout.Height(cellSize)))
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Height(400));
+
+            for (int z = gridData.cellsZ - 1; z >= 0; z--)
+            {
+                EditorGUILayout.BeginHorizontal();
+                for (int x = 0; x < gridData.cellsX; x++)
                 {
-                    gridData.SetCell(x, z, !cellValue);
+                    // Güvenli cell değeri alma
+                    int cellValue = 0;
+                    if (gridData != null && gridData.cells != null)
+                    {
+                        cellValue = gridData.GetCell(x, z);
+                    }
+                    
+                    GUIStyle style = new GUIStyle(GUI.skin.button);
+
+                    switch (cellValue)
+                    {
+                        case 0: style.normal.textColor = Color.white; break;  // 0: Boş (beyaz)
+                        case 1: style.normal.textColor = Color.green; break; // 1: Grass (yeşil)
+                        case 2: style.normal.textColor = Color.red; break;   // 2: Kırmızı karakter
+                        case 3: style.normal.textColor = Color.green; break; // 3: Yeşil karakter
+                        case 4: style.normal.textColor = Color.blue; break;  // 4: Mavi karakter
+                        case 5: style.normal.textColor = Color.yellow; break; // 5: Sarı karakter
+                    }
+
+                    // Tüm hücreleri tıklanabilir yap (0 dahil)
+                    if (GUILayout.Button(cellValue.ToString(), style, GUILayout.Width(cellSize), GUILayout.Height(cellSize)))
+                    {
+                        if (gridData != null && gridData.cells != null)
+                        {
+                            int current = gridData.GetCell(x, z);
+                            current = (current + 1) % 6; // 0-5 arası döner
+                            gridData.SetCell(x, z, current);
+                        }
+                    }
                 }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.EndScrollView();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Save Grid To JSON"))
+            {
+                if (gridData != null)
+                {
+                    GridDataIO.SaveGridData(gridData, jsonPath);
+                    AssetDatabase.Refresh();
+                }
+            }
+            if (GUILayout.Button("Load Grid From JSON"))
+            {
+                LoadGrid();
             }
             EditorGUILayout.EndHorizontal();
         }
-
-        EditorGUILayout.EndScrollView();
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Save Grid To JSON"))
+        else
         {
-            GridDataIO.SaveGridData(gridData, jsonPath);
-            AssetDatabase.Refresh();
+            EditorGUILayout.HelpBox("Grid data yok. New Grid yap veya JSON yükle.", MessageType.Info);
         }
-
-        if (GUILayout.Button("Load Grid From JSON"))
-        {
-            LoadGrid();
-        }
-        EditorGUILayout.EndHorizontal();
     }
 
     private void LoadGrid()
@@ -93,12 +117,12 @@ public class GridEditorWindow : EditorWindow
             gridData = loaded;
             cellsX = gridData.cellsX;
             cellsZ = gridData.cellsZ;
+            Debug.Log($"Grid yüklendi: {cellsX}x{cellsZ}");
         }
         else
         {
+            Debug.LogWarning("JSON yüklenemedi, yeni grid oluşturuluyor");
             gridData = new GridData(cellsX, cellsZ);
         }
     }
-
 }
-

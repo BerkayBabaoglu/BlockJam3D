@@ -1,28 +1,110 @@
 using System;
 using UnityEngine;
 
+[System.Serializable]
 public class GridData
 {
     public int cellsX;
     public int cellsZ;
-    public bool[] grassCells; 
+    public int[,] cells; 
+    
+    // JsonUtility için 1D array wrapper
+    [System.Serializable]
+    public class SerializableGrid
+    {
+        public int cellsX;
+        public int cellsZ;
+        public int[] cells1D;
+        
+        public SerializableGrid(int x, int z)
+        {
+            cellsX = x;
+            cellsZ = z;
+            cells1D = new int[x * z];
+        }
+        
+        public void SetCell(int x, int z, int value)
+        {
+            if (x >= 0 && x < cellsX && z >= 0 && z < cellsZ)
+            {
+                cells1D[z * cellsX + x] = value;
+            }
+        }
+        
+        public int GetCell(int x, int z)
+        {
+            if (x >= 0 && x < cellsX && z >= 0 && z < cellsZ)
+            {
+                return cells1D[z * cellsX + x];
+            }
+            return 0;
+        }
+        
+        public GridData ToGridData()
+        {
+            GridData result = new GridData(cellsX, cellsZ);
+            for (int x = 0; x < cellsX; x++)
+            {
+                for (int z = 0; z < cellsZ; z++)
+                {
+                    result.SetCell(x, z, GetCell(x, z));
+                }
+            }
+            return result;
+        }
+    }
 
     public GridData(int x,int z)
     {
         cellsX = x;
         cellsZ = z;
-        grassCells = new bool[x*z];
+        cells = new int[x,z];
+        
+        // Tüm hücreleri 0 ile başlat
+        for (int i = 0; i < x; i++)
+        {
+            for (int j = 0; j < z; j++)
+            {
+                cells[i,j] = 0;
+            }
+        }
     }
 
-    public bool GetCell(int x,int z)
+    public int GetCell(int x,int z)
     {
-        if(x<0 || x >= cellsX || z<0 || z>= cellsZ) return false;
-        return grassCells[z * cellsX + x];
+        // Bounds checking ekle
+        if (cells == null || x < 0 || x >= cellsX || z < 0 || z >= cellsZ)
+        {
+            Debug.LogWarning($"GetCell: Geçersiz koordinatlar ({x},{z}) veya cells array null. cellsX={cellsX}, cellsZ={cellsZ}");
+            return 0; // Varsayılan değer döndür
+        }
+        
+        return cells[x,z];
     }
 
-    public void SetCell(int x, int z, bool value)
+    public void SetCell(int x, int z, int value)
     {
-        if (x < 0 || x >= cellsX || z < 0 || z >= cellsZ) return;
-        grassCells[z * cellsX + x] = value;
+        // Bounds checking ekle
+        if (cells == null || x < 0 || x >= cellsX || z < 0 || z >= cellsZ)
+        {
+            Debug.LogWarning($"SetCell: Geçersiz koordinatlar ({x},{z}) veya cells array null. cellsX={cellsX}, cellsZ={cellsZ}");
+            return; // İşlemi atla
+        }
+       
+        cells[x,z] = value;
+    }
+    
+    // JSON serialization için
+    public SerializableGrid ToSerializable()
+    {
+        SerializableGrid result = new SerializableGrid(cellsX, cellsZ);
+        for (int x = 0; x < cellsX; x++)
+        {
+            for (int z = 0; z < cellsZ; z++)
+            {
+                result.SetCell(x, z, GetCell(x, z));
+            }
+        }
+        return result;
     }
 }
