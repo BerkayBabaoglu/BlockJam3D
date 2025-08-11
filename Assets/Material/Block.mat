@@ -150,8 +150,8 @@ Material:
     - __dummy__: 0
     - __outline_gui_dummy__: 0
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.82641506, g: 0.15103768, b: 0.123182535, a: 1}
+    - _Color: {r: 0.82641506, g: 0.15103763, b: 0.12318251, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.20784314, g: 0.20784314, b: 0.22745098, a: 1}

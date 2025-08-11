@@ -1,11 +1,13 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
 {
     public GameObject grassPrefab;
-    public int cellsX = 10;
-    public int cellsZ = 10;
+    public string jsonPath;
+    float grassPrefabHeight;
 
+    private GridData gridData;
     private Vector3 planeSize;
 
     private void Start()
@@ -13,12 +15,23 @@ public class GridGenerator : MonoBehaviour
         MeshRenderer mr = GetComponent<MeshRenderer>();
         planeSize = mr.bounds.size;
 
-        GenerateGrid();
+        grassPrefabHeight = grassPrefab.GetComponentInChildren<MeshRenderer>().bounds.size.y;
+
+        gridData = GridDataIO.LoadGridData(jsonPath);
+
+        if (gridData == null)
+        {
+            Debug.Log("GridData yuklenemedi");
+            return;
+        }
+
+        GenerateFromData();
     }
 
-    void GenerateGrid() {
-        float cellWidth = planeSize.x / cellsX;
-        float cellHeight = planeSize.z / cellsZ;
+    void GenerateFromData()
+    {
+        float cellWidth = planeSize.x / gridData.cellsX;
+        float cellHeight = planeSize.z / gridData.cellsZ;
 
         Debug.Log("PLANE SIZE : " + planeSize);
         Debug.Log("CELL WIDTH : " + cellWidth);
@@ -26,14 +39,16 @@ public class GridGenerator : MonoBehaviour
 
         Vector3 startPos = transform.position - new Vector3(planeSize.x / 2, 0, planeSize.z / 2);
 
-        for (int x = 0; x < cellsX; x++)
+        for (int x = 0; x < gridData.cellsX; x++)
         {
-            for (int z = 0; z < cellsZ; z++)
+            for (int z = 0; z < gridData.cellsZ; z++)
             {
+                if (!gridData.GetCell(x, z)) continue;
+
                 // Hücre merkezi
                 Vector3 cellPos = startPos + new Vector3(
                     cellWidth * (x + 0.5f),
-                    0,
+                    grassPrefabHeight + 2f,
                     cellHeight * (z + 0.5f)
                 );
 
@@ -46,9 +61,11 @@ public class GridGenerator : MonoBehaviour
                 float scaleX = cellWidth / originalSize.x;
                 float scaleZ = cellHeight / originalSize.z;
 
-                grass.transform.localScale = new Vector3(0.1884727f, 0.3907799f, 0.2211753f);
+                grass.transform.localScale = new Vector3(0.4969629f, 0.3911215f, 0.505403f);
             }
         }
+
+        
     }
 
     void OnDrawGizmos()
@@ -57,13 +74,13 @@ public class GridGenerator : MonoBehaviour
 
         Gizmos.color = Color.black;
 
-        float cellWidth = planeSize.x / cellsX;
-        float cellHeight = planeSize.z / cellsZ;
+        float cellWidth = planeSize.x / gridData.cellsX;
+        float cellHeight = planeSize.z / gridData.cellsZ;
 
         Vector3 startPos = transform.position - new Vector3(planeSize.x / 2, 0, planeSize.z / 2);
 
         // Dikey çizgiler
-        for (int x = 0; x <= cellsX; x++)
+        for (int x = 0; x <= gridData.cellsX; x++)
         {
             Vector3 from = startPos + new Vector3(x * cellWidth, 0, 0);
             Vector3 to = from + new Vector3(0, 0, planeSize.z);
@@ -73,11 +90,11 @@ public class GridGenerator : MonoBehaviour
             Debug.Log("Dikey planesize.z:" + planeSize.z);
             Debug.Log("Dikey x * cellWidth:" + x * cellWidth);
         }
-        
-        
-        
+
+
+
         // Yatay çizgiler
-        for (int z = 0; z <= cellsZ; z++)
+        for (int z = 0; z <= gridData.cellsZ; z++)
         {
             Vector3 from = startPos + new Vector3(0, 0, z * cellHeight);
             Vector3 to = from + new Vector3(planeSize.x, 0, 0);
