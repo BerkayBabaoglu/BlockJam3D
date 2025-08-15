@@ -11328,8 +11328,8 @@ GameObject:
   - component: {fileID: 486503460}
   - component: {fileID: 486503459}
   m_Layer: 0
-  m_Name: mapselect1 (104)
-  m_TagString: Untagged
+  m_Name: mapselect5
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -19397,8 +19397,8 @@ GameObject:
   - component: {fileID: 801924135}
   - component: {fileID: 801924134}
   m_Layer: 0
-  m_Name: mapselect1 (103)
-  m_TagString: Untagged
+  m_Name: mapselect4
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -21972,8 +21972,8 @@ GameObject:
   - component: {fileID: 920178425}
   - component: {fileID: 920178424}
   m_Layer: 0
-  m_Name: mapselect1 (100)
-  m_TagString: Untagged
+  m_Name: mapselect2
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30273,8 +30273,8 @@ GameObject:
   - component: {fileID: 1284330271}
   - component: {fileID: 1284330270}
   m_Layer: 0
-  m_Name: mapselect1 (102)
-  m_TagString: Untagged
+  m_Name: mapselect3
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -32565,8 +32565,8 @@ GameObject:
   - component: {fileID: 1373759130}
   - component: {fileID: 1373759129}
   m_Layer: 0
-  m_Name: mapselect1 (101)
-  m_TagString: Untagged
+  m_Name: mapselect1
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -33632,6 +33632,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1432144794}
+  - component: {fileID: 1432144795}
   m_Layer: 0
   m_Name: selectqueue
   m_TagString: Untagged
@@ -33652,8 +33653,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 920178423}
   - {fileID: 1373759128}
+  - {fileID: 920178423}
   - {fileID: 1284330269}
   - {fileID: 801924133}
   - {fileID: 486503458}
@@ -33661,6 +33662,19 @@ Transform:
   - {fileID: 1742768194}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1432144795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432144793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5836798b673a9b4ebcfe5d9a4a8408e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedTransforms: []
 --- !u!1001 &1436339705
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39618,8 +39632,8 @@ GameObject:
   - component: {fileID: 1725920730}
   - component: {fileID: 1725920729}
   m_Layer: 0
-  m_Name: mapselect1 (105)
-  m_TagString: Untagged
+  m_Name: mapselect6
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -40150,8 +40164,8 @@ GameObject:
   - component: {fileID: 1742768196}
   - component: {fileID: 1742768195}
   m_Layer: 0
-  m_Name: mapselect1 (106)
-  m_TagString: Untagged
+  m_Name: mapselect7
+  m_TagString: Empty
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
