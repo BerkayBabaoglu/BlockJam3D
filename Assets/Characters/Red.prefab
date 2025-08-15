@@ -3688,6 +3688,7 @@ GameObject:
   - component: {fileID: 3358274656933356155}
   - component: {fileID: -7361421221684187939}
   - component: {fileID: 112021844852309797}
+  - component: {fileID: 2501807377764035660}
   m_Layer: 6
   m_Name: Red
   m_TagString: Untagged
@@ -3830,12 +3831,27 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4669057782636007038}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79f42db33d4ca0a45b905ab2573eae60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 13
+  colorCode: K
+--- !u!114 &2501807377764035660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4669057782636007038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bc40d25662c00c4283411c721288d39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorCode: K
+  moveSpeed: 13
 --- !u!1 &4703504336790825402
 GameObject:
   m_ObjectHideFlags: 0

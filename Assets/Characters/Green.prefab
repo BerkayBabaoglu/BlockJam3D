@@ -478,6 +478,7 @@ GameObject:
   - component: {fileID: 4175233067501753373}
   - component: {fileID: 4919776777890691472}
   - component: {fileID: 2180945922620571478}
+  - component: {fileID: -1308580927500720908}
   m_Layer: 6
   m_Name: Green
   m_TagString: Untagged
@@ -620,12 +621,27 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1854534422600617755}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79f42db33d4ca0a45b905ab2573eae60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 13
+  colorCode: Y
+--- !u!114 &-1308580927500720908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1854534422600617755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bc40d25662c00c4283411c721288d39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorCode: Y
+  moveSpeed: 13
 --- !u!1 &1891914856689502667
 GameObject:
   m_ObjectHideFlags: 0

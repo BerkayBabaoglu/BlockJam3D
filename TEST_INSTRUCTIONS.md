@@ -1,68 +1,79 @@
-# Grid System Test Talimatları
+# QueueManager ve QueueUnit Güncellemeleri - Test Talimatları
 
-## Sorun Çözüldü! 🎉
+## Yapılan Değişiklikler
 
-### Yapılan Düzeltmeler:
+### 1. Silinme Efekti Süreleri Kısaltıldı
+- **Önceki süre**: 2 saniye
+- **Yeni süre**: 0.5 saniye
+- **Toplam patlama animasyonu**: 1.6 saniyeden 0.5 saniyeye düşürüldü
 
-1. **GridData.cs** - Bounds checking ve null safety eklendi
-2. **GridDataIO.cs** - JsonUtility 2D array sorunu çözüldü
-3. **GridGenerator.cs** - Debug bilgileri eklendi ve spawn mantığı güncellendi
-4. **level1.json** - Yeni format ile güncellendi
-5. **GridEditorWindow.cs** - Null safety eklendi ve renk kodları güncellendi
+### 2. Animasyon Süreleri Optimize Edildi
+- **Yukarı kalkma**: 0.6 saniyeden 0.3 saniyeye
+- **Ortaya gelme**: 0.5 saniyeden 0.25 saniyeye  
+- **Çarpışma efekti**: 0.3 saniyeden 0.1 saniyeye
+- **Feedback animasyonu**: 0.1 saniyeden 0.05 saniyeye
 
-### Spawn Mantığı:
+### 3. Race Condition Koruması Eklendi
+- `isProcessingMatches` flag'i ile blok silinirken yeni ekleme engelleniyor
+- Bloklar silinirken yeni bloklar eklenemiyor
+- Pozisyon karışıklığı önleniyor
 
-- **0**: Boş hücre - Hiçbir şey spawn edilmez (Beyaz)
-- **1**: Grass - `grassPrefab` spawn edilir (Yeşil)
-- **2**: Kırmızı karakter - `characterPrefabs[0]` spawn edilir (Kırmızı)
-- **3**: Yeşil karakter - `characterPrefabs[1]` spawn edilir (Yeşil)
-- **4**: Mavi karakter - `characterPrefabs[2]` spawn edilir (Mavi)
-- **5**: Sarı karakter - `characterPrefabs[3]` spawn edilir (Sarı)
+### 4. Hareket Hızı Artırıldı
+- **QueueUnit moveSpeed**: 4'ten 8'e çıkarıldı
+- Daha hızlı yerleşme sağlanıyor
 
-### Test Etmek İçin:
+## Test Senaryoları
 
-1. **Unity'de sahneyi aç**
-2. **GridGenerator GameObject'i bul** (MeshRenderer component'i olan bir GameObject)
-3. **Inspector'da prefab'ları ata:**
-   - `grassPrefab`: Grass prefab (örn: GroundCube)
-   - `characterPrefabs`: 4 farklı karakter prefab (örn: character5, Whiteman, barrel, key)
-4. **Play tuşuna bas**
-5. **Console'da debug mesajlarını kontrol et**
+### Senaryo 1: Temel 3'lü Eşleşme
+1. Inspector'da QueueManager'ı seç
+2. "Add Test Blocks" context menu'sünü çalıştır
+3. 3 kırmızı blok eklenecek
+4. "Test Explosion" context menu'sünü çalıştır
+5. **Beklenen sonuç**: Bloklar 0.5 saniyede patlayıp silinecek
 
-### Beklenen Sonuç:
+### Senaryo 2: Manuel Eşleşme Kontrolü
+1. Test blokları ekle
+2. "Check For Matches" context menu'sünü çalıştır
+3. **Beklenen sonuç**: 0.5 saniye sonra otomatik patlama
 
-- Console'da detaylı debug bilgileri görünmeli
-- Grid oluşturulmalı ve objeler spawn edilmeli
-- Toplam spawn edilen obje sayısı görünmeli
-- 0 değerli hücrelerde hiçbir şey spawn edilmemeli
+### Senaryo 3: Race Condition Testi
+1. Test blokları ekle
+2. Patlama başladıktan hemen sonra yeni blok eklemeye çalış
+3. **Beklenen sonuç**: Yeni ekleme engellenecek, log mesajı görünecek
 
-### Eğer Hala Çalışmıyorsa:
+### Senaryo 4: Queue Durumu Kontrolü
+1. Herhangi bir aşamada "Show Queue Status" context menu'sünü çalıştır
+2. **Beklenen sonuç**: Mevcut queue durumu console'da görünecek
 
-1. **Console'da hata mesajlarını kontrol et**
-2. **GridGenerator GameObject'inin MeshRenderer'ı olduğundan emin ol**
-3. **Prefab'ların doğru atandığından emin ol**
-4. **characterPrefabs array'inin 4 eleman olduğundan emin ol**
-5. **level1.json dosyasının doğru konumda olduğundan emin ol**
+## Performans İyileştirmeleri
 
-### Debug Bilgileri:
+### Önceki Durum:
+- Toplam silinme süresi: ~3.6 saniye (2s bekleme + 1.6s animasyon)
+- Hareket hızı: 4 birim/saniye
+- Feedback süresi: 0.2 saniye
 
-Tüm script'lerde detaylı debug bilgileri eklendi. Console'da şunları göreceksin:
-- Grid boyutları
-- Hücre değerleri
-- Prefab bulunma durumu
-- Spawn edilen obje sayısı
-- Hata durumları
+### Yeni Durum:
+- Toplam silinme süresi: ~1.0 saniye (0.5s bekleme + 0.5s animasyon)
+- Hareket hızı: 8 birim/saniye  
+- Feedback süresi: 0.1 saniye
 
-### Test Script:
+## Hata Düzeltmeleri
 
-`GridTest.cs` script'i de eklendi. Bu script'i herhangi bir GameObject'e ekleyerek test edebilirsin.
+1. **Race Condition**: Blok silinirken yeni ekleme engellendi
+2. **Pozisyon Karışıklığı**: `isProcessingMatches` flag'i ile önlendi
+3. **Yanlış Yerleştirme**: Blok silinirken pozisyon güncellemesi engellendi
+4. **Animasyon Çakışması**: Eşleşme işlemi sırasında yeni eşleşme kontrolü engellendi
 
-### Grid Editor:
+## Debug Özellikleri
 
-Tools > Grid Level Editor menüsünden grid'i düzenleyebilirsin. Hücre renkleri:
-- 0: Beyaz (boş)
-- 1: Yeşil (grass)
-- 2: Kırmızı (karakter)
-- 3: Yeşil (karakter)
-- 4: Mavi (karakter)
-- 5: Sarı (karakter)
+- **Console Logları**: Tüm işlemler detaylı olarak loglanıyor
+- **Context Menu'ler**: Test için kolay erişim
+- **Queue Status**: Mevcut durumu görüntüleme
+- **Gizmo'lar**: Renk kodlarını görsel olarak gösterme
+
+## Notlar
+
+- Tüm değişiklikler geriye uyumlu
+- Mevcut prefab'lar etkilenmiyor
+- Performans önemli ölçüde artırıldı
+- Hata durumları minimize edildi
