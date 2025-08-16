@@ -3687,11 +3687,10 @@ GameObject:
   - component: {fileID: 1504164351464577874}
   - component: {fileID: 3358274656933356155}
   - component: {fileID: -7361421221684187939}
-  - component: {fileID: 112021844852309797}
   - component: {fileID: 2501807377764035660}
   m_Layer: 6
   m_Name: Red
-  m_TagString: Untagged
+  m_TagString: Character
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3797,6 +3796,7 @@ MonoBehaviour:
   characterLayer:
     serializedVersion: 2
     m_Bits: 64
+  animator: {fileID: 8132182639323065661}
 --- !u!54 &-7361421221684187939
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3824,20 +3824,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &112021844852309797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4669057782636007038}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79f42db33d4ca0a45b905ab2573eae60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 13
-  colorCode: K
 --- !u!114 &2501807377764035660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3852,6 +3838,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorCode: K
   moveSpeed: 13
+  arrivalThreshold: 0.01
+  useSmoothMovement: 1
+  useGridPathfinding: 1
 --- !u!1 &4703504336790825402
 GameObject:
   m_ObjectHideFlags: 0
@@ -4966,6 +4955,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8390113116718722546}
+  - component: {fileID: 8132182639323065661}
   m_Layer: 6
   m_Name: Armature
   m_TagString: Untagged
@@ -4989,6 +4979,28 @@ Transform:
   - {fileID: 4968321056191402556}
   m_Father: {fileID: 6750040874792547845}
   m_LocalEulerAnglesHint: {x: -90.00001, y: -0, z: 0}
+--- !u!95 &8132182639323065661
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7253539536046367031}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 93a68d807453db44390eb9e12febf075, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7659719914880200783
 GameObject:
   m_ObjectHideFlags: 0

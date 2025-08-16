@@ -7,6 +7,9 @@ TagManager:
   - Selected
   - Empty
   - Occupied
+  - PathFindingNode
+  - PathfindingNode
+  - Character
   layers:
   - Default
   - TransparentFX

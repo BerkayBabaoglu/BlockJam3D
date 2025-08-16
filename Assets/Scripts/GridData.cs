@@ -7,8 +7,7 @@ public class GridData
     public int cellsX;
     public int cellsZ;
     public int[,] cells; 
-    
-    // JsonUtility için 1D array wrapper
+
     [System.Serializable]
     public class SerializableGrid
     {
@@ -59,8 +58,7 @@ public class GridData
         cellsX = x;
         cellsZ = z;
         cells = new int[x,z];
-        
-        // Tüm hücreleri 0 ile başlat
+
         for (int i = 0; i < x; i++)
         {
             for (int j = 0; j < z; j++)
@@ -72,11 +70,10 @@ public class GridData
 
     public int GetCell(int x,int z)
     {
-        // Bounds checking ekle
         if (cells == null || x < 0 || x >= cellsX || z < 0 || z >= cellsZ)
         {
             Debug.LogWarning($"GetCell: Geçersiz koordinatlar ({x},{z}) veya cells array null. cellsX={cellsX}, cellsZ={cellsZ}");
-            return 0; // Varsayılan değer döndür
+            return 0;
         }
         
         return cells[x,z];
@@ -84,11 +81,10 @@ public class GridData
 
     public void SetCell(int x, int z, int value)
     {
-        // Bounds checking ekle
         if (cells == null || x < 0 || x >= cellsX || z < 0 || z >= cellsZ)
         {
             Debug.LogWarning($"SetCell: Geçersiz koordinatlar ({x},{z}) veya cells array null. cellsX={cellsX}, cellsZ={cellsZ}");
-            return; // İşlemi atla
+            return; 
         }
        
         cells[x,z] = value;

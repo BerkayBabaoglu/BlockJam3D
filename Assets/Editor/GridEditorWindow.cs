@@ -51,7 +51,6 @@ public class GridEditorWindow : EditorWindow
                 EditorGUILayout.BeginHorizontal();
                 for (int x = 0; x < gridData.cellsX; x++)
                 {
-                    // Güvenli cell değeri alma
                     int cellValue = 0;
                     if (gridData != null && gridData.cells != null)
                     {
@@ -70,13 +69,12 @@ public class GridEditorWindow : EditorWindow
                         case 5: style.normal.textColor = Color.yellow; break; // 5: Sarı karakter
                     }
 
-                    // Tüm hücreleri tıklanabilir yap (0 dahil)
                     if (GUILayout.Button(cellValue.ToString(), style, GUILayout.Width(cellSize), GUILayout.Height(cellSize)))
                     {
                         if (gridData != null && gridData.cells != null)
                         {
                             int current = gridData.GetCell(x, z);
-                            current = (current + 1) % 6; // 0-5 arası döner
+                            current = (current + 1) % 6; // 0-5 arasi doner
                             gridData.SetCell(x, z, current);
                         }
                     }

@@ -19229,6 +19229,66 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6528587330784310431, guid: 808fdd7ac92ab314c9e3e1518a513233, type: 3}
   m_PrefabInstance: {fileID: 787219978}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &789873872
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 789873873}
+  - component: {fileID: 789873874}
+  m_Layer: 0
+  m_Name: GridPathfinding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &789873873
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789873872}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -16.068022, y: 3.24366, z: -19.81361}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &789873874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789873872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4237e336d4c87e4aa923c67310d7a5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridWidth: 10
+  gridHeight: 10
+  cellSize: 5
+  gridOrigin: {x: -25.15, y: -1.15, z: -25}
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  raycastHeight: 1
+  showDebugPath: 1
+  showCellCenters: 1
+  walkableCellColor: {r: 0, g: 1, b: 0, a: 1}
+  blockedCellColor: {r: 1, g: 0, b: 0, a: 1}
+  cellCenterColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  moveSpeed: 3
+  rotationSpeed: 5
+  stoppingDistance: 0.1
 --- !u!1001 &790235684
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -33872,7 +33932,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1432144794}
-  - component: {fileID: 1432144795}
   m_Layer: 0
   m_Name: selectqueue
   m_TagString: Untagged
@@ -33909,28 +33968,6 @@ Transform:
   - {fileID: 1742768194}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1432144795
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1432144793}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5836798b673a9b4ebcfe5d9a4a8408e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  queuePoints:
-  - {fileID: 194669118}
-  - {fileID: 325920124}
-  - {fileID: 981707271}
-  - {fileID: 936676835}
-  - {fileID: 1665100298}
-  - {fileID: 1262247779}
-  - {fileID: 130110310}
-  queueColors: []
-  queueObjects: []
 --- !u!1001 &1436339705
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44992,6 +45029,11 @@ MonoBehaviour:
   - {fileID: 343140471227736181, guid: 0433f5aa48f437f49bc15c787884797f, type: 3}
   - {fileID: 417174918543310199, guid: 54af57bb4f280b544b7561641f52aab0, type: 3}
   jsonPath: Assets/LevelData/level1.json
+  createPathfindingSystem: 1
+  cellSize: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &1996445293
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48349,3 +48391,4 @@ SceneRoots:
   - {fileID: 14413092}
   - {fileID: 1432144794}
   - {fileID: 1393385677}
+  - {fileID: 789873873}

@@ -109,11 +109,10 @@ GameObject:
   - component: {fileID: 7068891907121621028}
   - component: {fileID: 3672112530023527629}
   - component: {fileID: 6555401942165088206}
-  - component: {fileID: 8467073828212335835}
   - component: {fileID: -6900332983572706698}
   m_Layer: 6
   m_Name: Yellow
-  m_TagString: Untagged
+  m_TagString: Character
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -219,6 +218,7 @@ MonoBehaviour:
   characterLayer:
     serializedVersion: 2
     m_Bits: 64
+  animator: {fileID: 2307060553259061573}
 --- !u!54 &6555401942165088206
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -246,20 +246,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &8467073828212335835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 417174918543310199}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79f42db33d4ca0a45b905ab2573eae60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 13
-  colorCode: S
 --- !u!114 &-6900332983572706698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,6 +260,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorCode: S
   moveSpeed: 13
+  arrivalThreshold: 0.01
+  useSmoothMovement: 1
+  useGridPathfinding: 1
 --- !u!1 &442741780918061930
 GameObject:
   m_ObjectHideFlags: 0
@@ -3774,6 +3763,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4670258619891666117}
+  - component: {fileID: 2307060553259061573}
   m_Layer: 6
   m_Name: Armature
   m_TagString: Untagged
@@ -3797,6 +3787,28 @@ Transform:
   - {fileID: 1259798244506040922}
   m_Father: {fileID: 86264812601589353}
   m_LocalEulerAnglesHint: {x: -90.00001, y: -0, z: 0}
+--- !u!95 &2307060553259061573
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3193675764738287224}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3453629315154300599
 GameObject:
   m_ObjectHideFlags: 0
