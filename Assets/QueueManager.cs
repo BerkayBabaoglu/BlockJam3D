@@ -48,6 +48,76 @@ public class QueueManager : MonoBehaviour
         
         Debug.Log($"[QueueManager] Awake tamamlandı");
     }
+    
+    void OnDestroy()
+    {
+        // Clean up all coroutines when QueueManager is destroyed
+        if (matchLoopRoutine != null)
+        {
+            StopCoroutine(matchLoopRoutine);
+            matchLoopRoutine = null;
+        }
+        StopAllCoroutines();
+    }
+    
+    void OnDisable()
+    {
+        // Clean up all coroutines when QueueManager is disabled
+        if (matchLoopRoutine != null)
+        {
+            StopCoroutine(matchLoopRoutine);
+            matchLoopRoutine = null;
+        }
+        StopAllCoroutines();
+    }
+    
+    // Clean up all coroutines
+    public void CleanupAllCoroutines()
+    {
+        if (matchLoopRoutine != null)
+        {
+            StopCoroutine(matchLoopRoutine);
+            matchLoopRoutine = null;
+        }
+        StopAllCoroutines();
+        Debug.Log("[QueueManager] All coroutines cleaned up");
+    }
+    
+    // Debug command to force cleanup
+    [ContextMenu("Force Cleanup All Coroutines")]
+    void ForceCleanup()
+    {
+        Debug.Log("[QueueManager] Force cleanup requested");
+        CleanupAllCoroutines();
+    }
+    
+    // Debug command to show coroutine status
+    [ContextMenu("Show Coroutine Status")]
+    void ShowCoroutineStatus()
+    {
+        Debug.Log($"[QueueManager] Coroutine Status - matchLoopRoutine: {(matchLoopRoutine != null ? "Running" : "Null")}");
+        Debug.Log($"[QueueManager] Board Locked: {boardLocked}, Processing Matches: {isProcessingMatches}");
+    }
+    
+    // Memory leak test
+    [ContextMenu("Test Memory Leak")]
+    void TestMemoryLeak()
+    {
+        Debug.Log("[QueueManager] Testing memory leak...");
+        
+        // Force cleanup
+        CleanupAllCoroutines();
+        
+        // Check if any coroutines are still running
+        if (matchLoopRoutine != null)
+        {
+            Debug.LogError("[QueueManager] MEMORY LEAK DETECTED! Coroutines not cleaned up properly!");
+        }
+        else
+        {
+            Debug.Log("[QueueManager] No memory leak detected. All coroutines cleaned up successfully.");
+        }
+    }
 
     public bool TryInsert(GameObject unit, string color, out int index)
     {
@@ -119,7 +189,8 @@ public class QueueManager : MonoBehaviour
                     var q = objs[i].GetComponent<QueueUnit>();
                     if (q != null)
                     {
-                        q.SetIndex(i);
+                        // Use SetIndexDirect for queue shifting to avoid grid pathfinding
+                        q.SetIndexDirect(i);
                     }
                     else
                     {
@@ -445,7 +516,7 @@ public class QueueManager : MonoBehaviour
         if (moves.Count == 0) yield break;
 
         foreach (var m in moves)
-            m.unit.SetIndex(m.toIndex);
+            m.unit.SetIndexDirect(m.toIndex);
 
         yield return new WaitUntil(() =>
         {

@@ -7,13 +7,13 @@ public class GridPathfinding : MonoBehaviour
     public int gridWidth = 10;
     public int gridHeight = 10;
     public float cellSize = 1f;
-    public Vector3 gridOrigin = Vector3.zero;
+    public Vector3 gridOrigin = new Vector3(0f, -0.7f, 0f);
     
     [Header("Pathfinding Settings")]
     public LayerMask obstacleLayer = -1;
-    public float raycastHeight = 1f;
     public bool showDebugPath = true;
     public bool showCellCenters = true;
+    public bool showGridInfo = true;
     public Color walkableCellColor = Color.green;
     public Color blockedCellColor = Color.red;
     public Color cellCenterColor = Color.yellow;
@@ -55,6 +55,8 @@ public class GridPathfinding : MonoBehaviour
     
     void InitializeGrid()
     {
+        Debug.Log($"[GridPathfinding] Initializing grid: {gridWidth}x{gridHeight}, cellSize: {cellSize}, origin: {gridOrigin}");
+        
         grid = new Node[gridWidth, gridHeight];
         
         for (int x = 0; x < gridWidth; x++)
@@ -63,40 +65,28 @@ public class GridPathfinding : MonoBehaviour
             {
                 Vector3 worldPoint = GetWorldPosition(x, z);
                 
-                // Check if this grid cell is walkable
-                // Use a smaller radius to avoid false positives
-                bool walkable = !Physics.CheckSphere(worldPoint, cellSize * 0.3f, obstacleLayer);
-                
-                // Additional check: make sure the cell is not too close to obstacles
-                if (walkable)
-                {
-                    // Check if there are obstacles above the cell
-                    if (Physics.Raycast(worldPoint + Vector3.up * 0.1f, Vector3.down, 1f, obstacleLayer))
-                    {
-                        walkable = false;
-                    }
-                }
+                // Make all cells walkable for now (for testing)
+                bool walkable = true;
                 
                 grid[x, z] = new Node(x, z, worldPoint, walkable);
+                
+                Debug.Log($"[GridPathfinding] Grid cell ({x},{z}) at {worldPoint} - Walkable: {walkable}");
             }
         }
+        
+        Debug.Log($"[GridPathfinding] Grid initialization completed");
     }
     
     // Convert grid coordinates to world position
     public Vector3 GetWorldPosition(int x, int z)
     {
-        // This matches the GridGenerator's cell position calculation exactly
-        // GridGenerator uses: startPos + new Vector3(cellWidth * (x + 0.5f), 0, cellHeight * (z + 0.5f))
-        // Where startPos = transform.position - new Vector3(planeSize.x * 0.5f, 0f, planeSize.z * 0.5f)
-        // So we need to match: gridOrigin + new Vector3(cellSize * (x + 0.5f), 0, cellSize * (z + 0.5f))
-        return gridOrigin + new Vector3(cellSize * (x + 0.5f), 0, cellSize * (z + 0.5f));
+        return gridOrigin + new Vector3(cellSize * (x + 0.5f), gridOrigin.y, cellSize * (z + 0.5f));
     }
     
     // Convert world position to grid coordinates
     public Vector2Int GetGridPosition(Vector3 worldPosition)
     {
         Vector3 localPos = worldPosition - gridOrigin;
-        // Since we use (x + 0.5f) in GetWorldPosition, we need to subtract 0.5f here
         int x = Mathf.FloorToInt((localPos.x / cellSize) - 0.5f);
         int z = Mathf.FloorToInt((localPos.z / cellSize) - 0.5f);
         
@@ -142,94 +132,69 @@ public class GridPathfinding : MonoBehaviour
         return dstX + dstZ;
     }
     
-    // A* Pathfinding algorithm
+    // Simple grid-based pathfinding algorithm
     public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos)
     {
+        Debug.Log($"[GridPathfinding] FindPath called: {startPos} -> {targetPos}");
+        
         Vector2Int startGrid = GetGridPosition(startPos);
         Vector2Int targetGrid = GetGridPosition(targetPos);
+        
+        Debug.Log($"[GridPathfinding] Grid positions - Start: {startGrid}, Target: {targetGrid}");
+        Debug.Log($"[GridPathfinding] Grid bounds: {gridWidth}x{gridHeight}");
         
         // Ensure we're within grid bounds
         if (startGrid.x < 0 || startGrid.x >= gridWidth || startGrid.y < 0 || startGrid.y >= gridHeight ||
             targetGrid.x < 0 || targetGrid.x >= gridWidth || targetGrid.y < 0 || targetGrid.y >= gridHeight)
         {
-            Debug.LogWarning($"Start or target position outside grid bounds! Start: {startGrid}, Target: {targetGrid}, Grid: {gridWidth}x{gridHeight}");
+            Debug.LogWarning($"[GridPathfinding] Start or target position outside grid bounds! Start: {startGrid}, Target: {targetGrid}, Grid: {gridWidth}x{gridHeight}");
             return null;
         }
         
-        Node startNode = grid[startGrid.x, startGrid.y];
-        Node targetNode = grid[targetGrid.x, targetGrid.y];
+        // Create a simple path: start -> intermediate grid cells -> target
+        List<Vector3> path = new List<Vector3>();
         
-        if (!startNode.walkable || !targetNode.walkable)
+        // Add start position
+        path.Add(startPos);
+        
+        // Add intermediate grid cells
+        int currentX = startGrid.x;
+        int currentZ = startGrid.y;
+        
+        // Move horizontally first
+        while (currentX != targetGrid.x)
         {
-            Debug.LogWarning("Start or target position is not walkable!");
-            return null;
+            if (currentX < targetGrid.x) currentX++;
+            else currentX--;
+            
+            Vector3 intermediatePos = GetWorldPosition(currentX, currentZ);
+            path.Add(intermediatePos);
+            Debug.Log($"[GridPathfinding] Added horizontal waypoint: ({currentX},{currentZ}) at {intermediatePos}");
         }
         
-        // Initialize A* algorithm
-        openList.Clear();
-        closedList.Clear();
-        
-        // Reset all nodes
-        for (int x = 0; x < gridWidth; x++)
+        // Then move vertically
+        while (currentZ != targetGrid.y)
         {
-            for (int z = 0; z < gridHeight; z++)
-            {
-                grid[x, z].gCost = int.MaxValue;
-                grid[x, z].hCost = 0;
-                grid[x, z].parent = null;
-            }
+            if (currentZ < targetGrid.y) currentZ++;
+            else currentZ--;
+            
+            Vector3 intermediatePos = GetWorldPosition(currentX, currentZ);
+            path.Add(intermediatePos);
+            Debug.Log($"[GridPathfinding] Added vertical waypoint: ({currentX},{currentZ}) at {intermediatePos}");
         }
         
-        startNode.gCost = 0;
-        startNode.hCost = GetDistance(startNode, targetNode);
-        openList.Add(startNode);
+        // Add target position
+        path.Add(targetPos);
         
-        while (openList.Count > 0)
+        Debug.Log($"[GridPathfinding] Simple path created with {path.Count} waypoints");
+        
+        // Log all waypoints
+        for (int i = 0; i < path.Count; i++)
         {
-            Node currentNode = openList[0];
-            
-            // Find node with lowest fCost
-            for (int i = 1; i < openList.Count; i++)
-            {
-                if (openList[i].fCost < currentNode.fCost || 
-                    (openList[i].fCost == currentNode.fCost && openList[i].hCost < currentNode.hCost))
-                {
-                    currentNode = openList[i];
-                }
-            }
-            
-            openList.Remove(currentNode);
-            closedList.Add(currentNode);
-            
-            // Path found
-            if (currentNode == targetNode)
-            {
-                var path = RetracePath(startNode, targetNode);
-                return path;
-            }
-            
-            // Check neighbors
-            foreach (Node neighbor in GetNeighbors(currentNode))
-            {
-                if (!neighbor.walkable || closedList.Contains(neighbor))
-                    continue;
-                
-                int newMovementCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
-                
-                if (newMovementCostToNeighbor < neighbor.gCost || !openList.Contains(neighbor))
-                {
-                    neighbor.gCost = newMovementCostToNeighbor;
-                    neighbor.hCost = GetDistance(neighbor, targetNode);
-                    neighbor.parent = currentNode;
-                    
-                    if (!openList.Contains(neighbor))
-                        openList.Add(neighbor);
-                }
-            }
+            Debug.Log($"[GridPathfinding] Waypoint {i}: {path[i]}");
         }
         
-        Debug.LogWarning("No path found!");
-        return null;
+        return path;
     }
     
     // Retrace path from end to start
@@ -251,44 +216,13 @@ public class GridPathfinding : MonoBehaviour
         // Reverse to get path from start to end
         path.Reverse();
         
-        // Optimize path by removing unnecessary waypoints
-        path = OptimizePath(path);
+        // Don't optimize - keep all grid waypoints for grid-based movement
+        Debug.Log($"[GridPathfinding] Path created with {path.Count} waypoints (no optimization)");
         
         return path;
     }
     
-    // Optimize path by removing unnecessary waypoints (keep more waypoints for grid-based movement)
-    List<Vector3> OptimizePath(List<Vector3> originalPath)
-    {
-        if (originalPath.Count <= 2) return originalPath;
-        
-        List<Vector3> optimizedPath = new List<Vector3>();
-        optimizedPath.Add(originalPath[0]); // Add start
-        
-        for (int i = 1; i < originalPath.Count - 1; i++)
-        {
-            Vector3 prev = originalPath[i - 1];
-            Vector3 current = originalPath[i];
-            Vector3 next = originalPath[i + 1];
-            
-            // Always add the current waypoint
-            optimizedPath.Add(current);
-            
-            // Add intermediate waypoints for smoother grid movement
-            if (i < originalPath.Count - 2)
-            {
-                Vector3 direction = (next - current).normalized;
-                Vector3 intermediate = current + direction * (cellSize * 0.5f);
-                optimizedPath.Add(intermediate);
-            }
-        }
-        
-        optimizedPath.Add(originalPath[originalPath.Count - 1]); // Add end
-        
-        return optimizedPath;
-    }
-    
-    // Check if a position is walkable using raycast
+    // Check if a position is walkable
     public bool IsPositionWalkable(Vector3 position)
     {
         Vector2Int gridPos = GetGridPosition(position);
@@ -356,15 +290,15 @@ public class GridPathfinding : MonoBehaviour
         // Draw grid boundaries
         Gizmos.color = Color.blue;
         Vector3 gridSize = new Vector3(gridWidth * cellSize, 0.1f, gridHeight * cellSize);
-        Gizmos.DrawWireCube(gridOrigin + gridSize * 0.5f, gridSize);
+        Vector3 gridCenter = gridOrigin + gridSize * 0.5f;
+        Gizmos.DrawWireCube(gridCenter, gridSize);
         
         // Draw grid info text (for debugging)
         #if UNITY_EDITOR
-        if (grid != null)
+        if (showGridInfo)
         {
-            Vector3 centerPos = gridOrigin + gridSize * 0.5f;
-            UnityEditor.Handles.Label(centerPos + Vector3.up * 2f, 
-                $"Pathfinding Grid: {gridWidth}x{gridHeight}\nCell Size: {cellSize:F2}\nTotal Size: {gridSize.x:F1}x{gridSize.z:F1}");
+            UnityEditor.Handles.Label(gridCenter + Vector3.up * 2f, 
+                $"Pathfinding Grid: {gridWidth}x{gridHeight}\nCell Size: {cellSize:F2}\nTotal Size: {gridSize.x:F1}x{gridSize.z:F1}\nOrigin: {gridOrigin}");
         }
         #endif
         
@@ -395,6 +329,14 @@ public class GridPathfinding : MonoBehaviour
                         Gizmos.color = cellCenterColor;
                         Gizmos.DrawSphere(cellCenter, 0.1f);
                     }
+                    
+                    // Draw cell coordinates for debugging
+                    #if UNITY_EDITOR
+                    if (showGridInfo)
+                    {
+                        UnityEditor.Handles.Label(cellCenter + Vector3.up * 0.2f, $"({x},{z})");
+                    }
+                    #endif
                 }
             }
         }
@@ -417,6 +359,14 @@ public class GridPathfinding : MonoBehaviour
                         Gizmos.color = cellCenterColor;
                         Gizmos.DrawSphere(cellCenter, 0.1f);
                     }
+                    
+                    // Draw cell coordinates for debugging
+                    #if UNITY_EDITOR
+                    if (showGridInfo)
+                    {
+                        UnityEditor.Handles.Label(cellCenter + Vector3.up * 0.2f, $"({x},{z})");
+                    }
+                    #endif
                 }
             }
         }
@@ -434,20 +384,8 @@ public class GridPathfinding : MonoBehaviour
                 // Check if this grid cell is walkable
                 bool walkable = !Physics.CheckSphere(worldPoint, cellSize * 0.3f, obstacleLayer);
                 
-                // Additional check: make sure the cell is not too close to obstacles
-                if (walkable)
-                {
-                    // Check if there are obstacles above the cell
-                    if (Physics.Raycast(worldPoint + Vector3.up * 0.1f, Vector3.down, 1f, obstacleLayer))
-                    {
-                        walkable = false;
-                    }
-                }
-                
                 grid[x, z].walkable = walkable;
             }
         }
-        
-        Debug.Log("Grid walkability updated");
     }
 }

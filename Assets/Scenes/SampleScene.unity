@@ -19276,13 +19276,13 @@ MonoBehaviour:
   gridWidth: 10
   gridHeight: 10
   cellSize: 5
-  gridOrigin: {x: -25.15, y: -1.15, z: -25}
+  gridOrigin: {x: -25.15, y: -0.3, z: -25}
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 4294967295
-  raycastHeight: 1
   showDebugPath: 1
   showCellCenters: 1
+  showGridInfo: 1
   walkableCellColor: {r: 0, g: 1, b: 0, a: 1}
   blockedCellColor: {r: 1, g: 0, b: 0, a: 1}
   cellCenterColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

@@ -11,7 +11,7 @@ public class PathfindingTest : MonoBehaviour
     public int gridWidth = 10;
     public int gridHeight = 10;
     public float cellSize = 1f;
-    public Vector3 gridOrigin = Vector3.zero;
+    public Vector3 gridOrigin = new Vector3(0f, -0.7f, 0f);
     
     private GridPathfinding pathfinding;
     private CharacterMovement characterMovement;
@@ -26,15 +26,23 @@ public class PathfindingTest : MonoBehaviour
     
     void SetupPathfindingSystem()
     {
-        // Create pathfinding system
-        GameObject pathfindingGO = new GameObject("GridPathfinding");
-        pathfinding = pathfindingGO.AddComponent<GridPathfinding>();
+        // Find existing pathfinding system in the scene instead of creating new one
+        pathfinding = FindObjectOfType<GridPathfinding>();
         
-        // Configure pathfinding
+        if (pathfinding == null)
+        {
+            Debug.LogError("No GridPathfinding found in scene! Please add one to the scene.");
+            return;
+        }
+
+        Debug.Log($"Using existing GridPathfinding: {pathfinding.name}");
+        
+        // Configure the existing pathfinding system
         pathfinding.gridWidth = gridWidth;
         pathfinding.gridHeight = gridHeight;
         pathfinding.cellSize = cellSize;
-        pathfinding.gridOrigin = gridOrigin;
+        // Don't modify gridOrigin - keep user's Inspector settings
+        // pathfinding.gridOrigin = gridOrigin;
         pathfinding.showDebugPath = showDebugInfo;
         
         // Set obstacle layer (you can adjust this based on your project)
@@ -188,7 +196,8 @@ public class PathfindingTest : MonoBehaviour
         pathfinding.gridWidth = gridWidth;
         pathfinding.gridHeight = gridHeight;
         pathfinding.cellSize = cellSize;
-        pathfinding.gridOrigin = gridOrigin;
+        // Don't modify gridOrigin - keep user's Inspector settings
+        // pathfinding.gridOrigin = gridOrigin;
         
         Debug.Log("Manual grid setup completed!");
     }

@@ -69,9 +69,10 @@ public class CharacterController : MonoBehaviour
         {
             UpdatePathfindingMovement();
         }
-        // Fallback to direct movement if no pathfinding
+        // Direct movement to queue position (after grid pathfinding is complete)
         else if (isMoving && targetPoint != null)
         {
+            // Move directly to the queue position, not to any intermediate grid cell
             transform.position = Vector3.MoveTowards(transform.position, targetPoint.position, speed * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, targetPoint.position) < 0.01f)
@@ -88,8 +89,12 @@ public class CharacterController : MonoBehaviour
     {
         if (pathfinding != null && targetPoint != null)
         {
-            // First, find path to queue position using grid-based pathfinding
-            currentPath = pathfinding.FindPath(transform.position, targetPoint.position);
+            // Find the last walkable grid cell before the queue position
+            // This ensures the character follows grid until the last possible cell, then goes directly to queue
+            Vector3 lastGridPosition = FindLastWalkableGridPosition(targetPoint.position);
+            
+            // First, find path to the last walkable grid position
+            currentPath = pathfinding.FindPath(transform.position, lastGridPosition);
             
             if (currentPath != null && currentPath.Count > 0)
             {
@@ -98,7 +103,7 @@ public class CharacterController : MonoBehaviour
                 currentWaypointIndex = 0;
                 isMoving = false;
                 
-                Debug.Log("Grid pathfinding started with " + currentPath.Count + " waypoints");
+                Debug.Log("Grid pathfinding started with " + currentPath.Count + " waypoints to last grid cell: " + lastGridPosition);
             }
             else
             {
@@ -113,6 +118,58 @@ public class CharacterController : MonoBehaviour
             Debug.LogWarning("No pathfinding system found, using direct movement");
             isMoving = true;
         }
+    }
+    
+    // Find the last walkable grid position before the queue position
+    Vector3 FindLastWalkableGridPosition(Vector3 queuePosition)
+    {
+        if (pathfinding == null) return queuePosition;
+        
+        // Get the grid position of the queue
+        Vector2Int queueGridPos = pathfinding.GetGridPosition(queuePosition);
+        
+        // Find the closest walkable grid cell to the queue
+        // We'll look for a cell that's walkable and close to the queue
+        Vector3 closestWalkable = queuePosition;
+        float closestDistance = float.MaxValue;
+        
+        // Check a small area around the queue position for walkable cells
+        int searchRadius = 3;
+        for (int x = -searchRadius; x <= searchRadius; x++)
+        {
+            for (int z = -searchRadius; z <= searchRadius; z++)
+            {
+                Vector2Int checkPos = new Vector2Int(queueGridPos.x + x, queueGridPos.y + z);
+                
+                // Check if this position is within grid bounds
+                if (checkPos.x >= 0 && checkPos.x < pathfinding.gridWidth && 
+                    checkPos.y >= 0 && checkPos.y < pathfinding.gridHeight)
+                {
+                    // Check if this position is walkable
+                    if (pathfinding.IsPositionWalkable(pathfinding.GetWorldPosition(checkPos.x, checkPos.y)))
+                    {
+                        Vector3 worldPos = pathfinding.GetWorldPosition(checkPos.x, checkPos.y);
+                        float distance = Vector3.Distance(worldPos, queuePosition);
+                        
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            closestWalkable = worldPos;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // If no walkable grid cell found, return the original queue position
+        if (closestDistance == float.MaxValue)
+        {
+            Debug.LogWarning("No walkable grid cell found near queue, using direct movement");
+            return queuePosition;
+        }
+        
+        Debug.Log($"Found last walkable grid position: {closestWalkable} (distance: {closestDistance:F2})");
+        return closestWalkable;
     }
 
     // Update movement along the path
@@ -144,6 +201,9 @@ public class CharacterController : MonoBehaviour
                 currentWaypointIndex = 0;
                 isMoving = true;
                 
+                // Ensure we start moving directly to the queue position, not to the last grid cell
+                // This prevents the character from going back to the nearest grid cell
+                // The character will now move directly from the last grid cell to the queue position
                 return;
             }
             

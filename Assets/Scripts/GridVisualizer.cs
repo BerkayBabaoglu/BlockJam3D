@@ -14,7 +14,7 @@ public class GridVisualizer : MonoBehaviour
     public int gridWidth = 10;
     public int gridHeight = 10;
     public float cellSize = 1f;
-    public Vector3 gridOrigin = Vector3.zero;
+    public Vector3 gridOrigin = new Vector3(0f, -0.7f, 0f);
     
     [Header("Debug Info")]
     public bool showDebugInfo = true;

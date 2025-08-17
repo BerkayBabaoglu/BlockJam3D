@@ -3727,7 +3727,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -3820,7 +3820,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -3837,10 +3837,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorCode: K
-  moveSpeed: 13
+  moveSpeed: 50
   arrivalThreshold: 0.01
   useSmoothMovement: 1
   useGridPathfinding: 1
+  isSelected: 0
+  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &4703504336790825402
 GameObject:
   m_ObjectHideFlags: 0

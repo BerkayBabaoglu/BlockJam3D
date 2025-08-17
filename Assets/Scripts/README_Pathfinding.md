@@ -16,8 +16,10 @@ Ana pathfinding sistemi. Grid'i oluşturur ve A* algoritması ile yol bulur.
 
 **Kullanım:**
 ```csharp
-// Grid oluştur
-GridPathfinding pathfinding = gameObject.AddComponent<GridPathfinding>();
+// Sahnenizde zaten var olan GridPathfinding'i kullanın
+GridPathfinding pathfinding = FindObjectOfType<GridPathfinding>();
+
+// Grid ayarlarını yapılandırın
 pathfinding.gridWidth = 10;
 pathfinding.gridHeight = 10;
 pathfinding.cellSize = 1f;
@@ -69,11 +71,10 @@ Sistemi test etmek için hazır test scripti.
 
 ### 2. Manuel Kurulum
 ```csharp
-// Pathfinding sistemi oluştur
-GameObject pathfindingGO = new GameObject("GridPathfinding");
-GridPathfinding pathfinding = pathfindingGO.AddComponent<GridPathfinding>();
+// Sahnenizde zaten var olan GridPathfinding'i bulun
+GridPathfinding pathfinding = FindObjectOfType<GridPathfinding>();
 
-// Grid ayarları
+// Grid ayarlarını yapılandırın
 pathfinding.gridWidth = 10;
 pathfinding.gridHeight = 10;
 pathfinding.cellSize = 1f;

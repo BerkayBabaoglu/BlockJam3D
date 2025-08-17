@@ -84,7 +84,12 @@ public class GridGenerator : MonoBehaviour
         
         if (createPathfindingSystem)
         {
+            Debug.Log($"[{name}] createPathfindingSystem = true, setting up pathfinding system...");
             SetupPathfindingSystem();
+        }
+        else
+        {
+            Debug.LogWarning($"[{name}] createPathfindingSystem = false! Pathfinding system will NOT be created!");
         }
     }
     
@@ -227,15 +232,18 @@ public class GridGenerator : MonoBehaviour
 
     void SetupPathfindingSystem()
     {
-        if (pathfindingSystem != null)
+        // Find existing GridPathfinding in the scene instead of creating new one
+        pathfindingSystem = FindObjectOfType<GridPathfinding>();
+        
+        if (pathfindingSystem == null)
         {
-            Debug.Log($"[{name}] Pathfinding system already exists, skipping setup.");
+            Debug.LogError($"[{name}] No GridPathfinding found in scene! Please add one to the scene.");
             return;
         }
 
-        GameObject pathfindingGO = new GameObject("GridPathfinding");
-        pathfindingSystem = pathfindingGO.AddComponent<GridPathfinding>();
+        Debug.Log($"[{name}] Using existing GridPathfinding: {pathfindingSystem.name}");
 
+        // Configure the existing pathfinding system
         pathfindingSystem.gridWidth = gridData.cellsX;
         pathfindingSystem.gridHeight = gridData.cellsZ;
 
@@ -244,7 +252,8 @@ public class GridGenerator : MonoBehaviour
 
         pathfindingSystem.cellSize = Mathf.Min(actualCellWidth, actualCellHeight);
 
-        pathfindingSystem.gridOrigin = transform.position - new Vector3(planeSize.x * 0.5f, 0f, planeSize.z * 0.5f);
+        // Don't modify gridOrigin - keep user's Inspector settings
+        // pathfindingSystem.gridOrigin = transform.position - new Vector3(planeSize.x * 0.5f, -0.7f, planeSize.z * 0.5f);
         
         Debug.Log($"[{name}] Pathfinding grid setup details:");
         Debug.Log($"  Main grid: {gridData.cellsX}x{gridData.cellsZ}");
@@ -254,18 +263,49 @@ public class GridGenerator : MonoBehaviour
         Debug.Log($"  Pathfinding cell size: {pathfindingSystem.cellSize}");
         Debug.Log($"  Pathfinding origin: {pathfindingSystem.gridOrigin}");
         Debug.Log($"  Pathfinding total size: {pathfindingSystem.gridWidth * pathfindingSystem.cellSize}x{pathfindingSystem.gridHeight * pathfindingSystem.cellSize}");
+        
         pathfindingSystem.obstacleLayer = obstacleLayer;
         pathfindingSystem.showDebugPath = true;
 
-        pathfindingGO.transform.SetParent(transform);
-        
-        Debug.Log($"[{name}] Pathfinding system setup completed:");
-        Debug.Log($"  Grid: {gridData.cellsX}x{gridData.cellsZ}");
-        Debug.Log($"  Plane Size: {planeSize}");
-        Debug.Log($"  Calculated Cell Size: {pathfindingSystem.cellSize}");
-        Debug.Log($"  Grid Origin: {pathfindingSystem.gridOrigin}");
+        Debug.Log($"[{name}] Pathfinding system setup completed successfully!");
+        Debug.Log($"[{name}] Using existing GridPathfinding: {pathfindingSystem.name}");
 
         Invoke("UpdatePathfindingWalkability", 0.1f);
+        
+        // Notify all QueueUnits that pathfinding is ready
+        NotifyQueueUnitsPathfindingReady();
+    }
+    
+    void NotifyQueueUnitsPathfindingReady()
+    {
+        Debug.Log($"[{name}] Notifying QueueUnits that pathfinding is ready...");
+        
+        QueueUnit[] queueUnits = FindObjectsOfType<QueueUnit>();
+        Debug.Log($"[{name}] Found {queueUnits.Length} QueueUnits to notify");
+        
+        foreach (QueueUnit unit in queueUnits)
+        {
+            if (unit != null)
+            {
+                // Set the pathfinding reference directly
+                var pathfindingField = typeof(QueueUnit).GetField("pathfinding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (pathfindingField != null)
+                {
+                    pathfindingField.SetValue(unit, pathfindingSystem);
+                    Debug.Log($"[{name}] Set pathfinding reference for {unit.name}");
+                }
+                
+                // Enable grid pathfinding for this unit
+                var useGridPathfindingField = typeof(QueueUnit).GetField("useGridPathfinding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (useGridPathfindingField != null)
+                {
+                    useGridPathfindingField.SetValue(unit, true);
+                    Debug.Log($"[{name}] Enabled grid pathfinding for {unit.name}");
+                }
+            }
+        }
+        
+        Debug.Log($"[{name}] Pathfinding notification completed for {queueUnits.Length} QueueUnits");
     }
 
     void UpdatePathfindingWalkability()
