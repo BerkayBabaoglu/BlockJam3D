@@ -27,11 +27,9 @@ public class GridGenerator : MonoBehaviour
         MeshRenderer mr = GetComponent<MeshRenderer>();
         if (mr == null)
         {
-            Debug.LogError($"[{name}] MeshRenderer bulunamadı. GridGenerator bu GameObject üzerinde bir MeshRenderer bekliyor.");
             return;
         }
         planeSize = mr.bounds.size;
-        Debug.Log($"[{name}] MeshRenderer bulundu, plane size: {planeSize}");
 
         if (grassPrefab != null)
         {
@@ -39,57 +37,33 @@ public class GridGenerator : MonoBehaviour
             if (gmr != null) 
             {
                 grassPrefabHeight = gmr.bounds.size.y;
-                Debug.Log($"[{name}] Grass prefab height: {grassPrefabHeight}");
             }
             else
             {
-                Debug.LogWarning("grassPrefab üzerinde MeshRenderer bulunamadı. Varsayılan height kullanılacak.");
                 grassPrefabHeight = 0.5f;
             }
-        }
-        else
-        {
-            Debug.LogWarning("Grass prefab atanmamış. Grass spawn edilmeyecek.");
-        }
-
-        if (characterPrefabs != null && characterPrefabs.Length > 0)
-        {
-            Debug.Log($"[{name}] {characterPrefabs.Length} character prefab bulundu");
-        }
-        else
-        {
-            Debug.LogWarning("characterPrefabs array'i boş veya null. Karakter spawn edilmeyecek.");
         }
 
         Debug.Log($"[{name}] JSON yükleniyor: {jsonPath}");
         gridData = GridDataIO.LoadGridData(jsonPath);
         if (gridData == null)
         {
-            Debug.LogError($"GridData yüklenemedi: {jsonPath}");
             return;
         }
-        
-        Debug.Log($"[{name}] GridData yüklendi: {gridData.cellsX}x{gridData.cellsZ}");
+
 
         if (gridData.cellsX <= 0 || gridData.cellsZ <= 0)
         {
-            Debug.LogError("GridData geçersiz cellsX/cellsZ değerleri içeriyor.");
             return;
         }
 
         if (characterPrefabs == null) characterPrefabs = new GameObject[0];
 
-        Debug.Log($"[name] GenerateFromData çağrılıyor...");
         GenerateFromData();
         
         if (createPathfindingSystem)
         {
-            Debug.Log($"[{name}] createPathfindingSystem = true, setting up pathfinding system...");
             SetupPathfindingSystem();
-        }
-        else
-        {
-            Debug.LogWarning($"[{name}] createPathfindingSystem = false! Pathfinding system will NOT be created!");
         }
     }
     
@@ -123,8 +97,7 @@ public class GridGenerator : MonoBehaviour
                 
                 Debug.Log($"[{name}] Cell ({x},{z}) = {cellType}");
 
-                // 0 boş - hiçbir şey spawn edilmeyecek
-                if (cellType == 0) 
+                if (cellType == 0) //bos
                 {
                     Debug.Log($"[{name}] Hücre ({x},{z}) boş, atlanıyor");
                     continue;
@@ -199,16 +172,9 @@ public class GridGenerator : MonoBehaviour
                                 
                                 Debug.Log($"[{name}] {obj.name} (grass) scaled to {obj.transform.localScale}");
                             }
-                            else
-                            {
 
-                                Debug.LogWarning($"Instantiated '{obj.name}' renderer.bounds sıfır gibi ({originalSize}). Scale atlanıyor.");
-                            }
                         }
-                        else
-                        {
-                            Debug.LogWarning($"Instantiate edilen '{obj.name}' içinde MeshRenderer bulunamadı. Ölçek ayarlanmadı.");
-                        }
+
                     }
                     else // Karakterler (2,3,4,5) - sabit scale
                     {
@@ -225,25 +191,17 @@ public class GridGenerator : MonoBehaviour
                 }
             }
         }
-        
-        Debug.Log($"[{name}] Toplam {spawnedCount} obje spawn edildi");
-        Debug.Log($"[{name}] {occupiedPositions.Count} karakter pozisyonu kaydedildi");
     }
 
     void SetupPathfindingSystem()
     {
-        // Find existing GridPathfinding in the scene instead of creating new one
         pathfindingSystem = FindObjectOfType<GridPathfinding>();
         
         if (pathfindingSystem == null)
         {
-            Debug.LogError($"[{name}] No GridPathfinding found in scene! Please add one to the scene.");
             return;
         }
 
-        Debug.Log($"[{name}] Using existing GridPathfinding: {pathfindingSystem.name}");
-
-        // Configure the existing pathfinding system
         pathfindingSystem.gridWidth = gridData.cellsX;
         pathfindingSystem.gridHeight = gridData.cellsZ;
 
@@ -252,27 +210,11 @@ public class GridGenerator : MonoBehaviour
 
         pathfindingSystem.cellSize = Mathf.Min(actualCellWidth, actualCellHeight);
 
-        // Don't modify gridOrigin - keep user's Inspector settings
-        // pathfindingSystem.gridOrigin = transform.position - new Vector3(planeSize.x * 0.5f, -0.7f, planeSize.z * 0.5f);
-        
-        Debug.Log($"[{name}] Pathfinding grid setup details:");
-        Debug.Log($"  Main grid: {gridData.cellsX}x{gridData.cellsZ}");
-        Debug.Log($"  Main grid plane size: {planeSize}");
-        Debug.Log($"  Main grid cell size: {actualCellWidth}x{actualCellHeight}");
-        Debug.Log($"  Pathfinding grid: {pathfindingSystem.gridWidth}x{pathfindingSystem.gridHeight}");
-        Debug.Log($"  Pathfinding cell size: {pathfindingSystem.cellSize}");
-        Debug.Log($"  Pathfinding origin: {pathfindingSystem.gridOrigin}");
-        Debug.Log($"  Pathfinding total size: {pathfindingSystem.gridWidth * pathfindingSystem.cellSize}x{pathfindingSystem.gridHeight * pathfindingSystem.cellSize}");
-        
         pathfindingSystem.obstacleLayer = obstacleLayer;
         pathfindingSystem.showDebugPath = true;
 
-        Debug.Log($"[{name}] Pathfinding system setup completed successfully!");
-        Debug.Log($"[{name}] Using existing GridPathfinding: {pathfindingSystem.name}");
-
         Invoke("UpdatePathfindingWalkability", 0.1f);
-        
-        // Notify all QueueUnits that pathfinding is ready
+
         NotifyQueueUnitsPathfindingReady();
     }
     
@@ -287,7 +229,7 @@ public class GridGenerator : MonoBehaviour
         {
             if (unit != null)
             {
-                // Set the pathfinding reference directly
+
                 var pathfindingField = typeof(QueueUnit).GetField("pathfinding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (pathfindingField != null)
                 {
@@ -295,7 +237,7 @@ public class GridGenerator : MonoBehaviour
                     Debug.Log($"[{name}] Set pathfinding reference for {unit.name}");
                 }
                 
-                // Enable grid pathfinding for this unit
+
                 var useGridPathfindingField = typeof(QueueUnit).GetField("useGridPathfinding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (useGridPathfindingField != null)
                 {

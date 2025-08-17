@@ -61,12 +61,12 @@ public class GridEditorWindow : EditorWindow
 
                     switch (cellValue)
                     {
-                        case 0: style.normal.textColor = Color.white; break;  // 0: Boş (beyaz)
-                        case 1: style.normal.textColor = Color.green; break; // 1: Grass (yeşil)
-                        case 2: style.normal.textColor = Color.red; break;   // 2: Kırmızı karakter
-                        case 3: style.normal.textColor = Color.green; break; // 3: Yeşil karakter
-                        case 4: style.normal.textColor = Color.blue; break;  // 4: Mavi karakter
-                        case 5: style.normal.textColor = Color.yellow; break; // 5: Sarı karakter
+                        case 0: style.normal.textColor = Color.white; break;  // 0: bos
+                        case 1: style.normal.textColor = Color.green; break; // 1: grass
+                        case 2: style.normal.textColor = Color.red; break;   // 2: kirmizi
+                        case 3: style.normal.textColor = Color.green; break; // 3: yesil
+                        case 4: style.normal.textColor = Color.blue; break;  // 4: mavi 
+                        case 5: style.normal.textColor = Color.yellow; break; // 5: sari
                     }
 
                     if (GUILayout.Button(cellValue.ToString(), style, GUILayout.Width(cellSize), GUILayout.Height(cellSize)))

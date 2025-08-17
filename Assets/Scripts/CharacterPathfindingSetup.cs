@@ -81,3 +81,4 @@ public class CharacterPathfindingSetup : MonoBehaviour
         return characterController != null && characterController.pathfinding != null;
     }
 }
+

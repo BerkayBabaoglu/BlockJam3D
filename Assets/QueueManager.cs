@@ -51,7 +51,6 @@ public class QueueManager : MonoBehaviour
     
     void OnDestroy()
     {
-        // Clean up all coroutines when QueueManager is destroyed
         if (matchLoopRoutine != null)
         {
             StopCoroutine(matchLoopRoutine);
@@ -62,7 +61,6 @@ public class QueueManager : MonoBehaviour
     
     void OnDisable()
     {
-        // Clean up all coroutines when QueueManager is disabled
         if (matchLoopRoutine != null)
         {
             StopCoroutine(matchLoopRoutine);
@@ -70,8 +68,7 @@ public class QueueManager : MonoBehaviour
         }
         StopAllCoroutines();
     }
-    
-    // Clean up all coroutines
+
     public void CleanupAllCoroutines()
     {
         if (matchLoopRoutine != null)
@@ -82,33 +79,28 @@ public class QueueManager : MonoBehaviour
         StopAllCoroutines();
         Debug.Log("[QueueManager] All coroutines cleaned up");
     }
-    
-    // Debug command to force cleanup
+
     [ContextMenu("Force Cleanup All Coroutines")]
     void ForceCleanup()
     {
         Debug.Log("[QueueManager] Force cleanup requested");
         CleanupAllCoroutines();
     }
-    
-    // Debug command to show coroutine status
+
     [ContextMenu("Show Coroutine Status")]
     void ShowCoroutineStatus()
     {
         Debug.Log($"[QueueManager] Coroutine Status - matchLoopRoutine: {(matchLoopRoutine != null ? "Running" : "Null")}");
         Debug.Log($"[QueueManager] Board Locked: {boardLocked}, Processing Matches: {isProcessingMatches}");
     }
-    
-    // Memory leak test
+
     [ContextMenu("Test Memory Leak")]
     void TestMemoryLeak()
     {
         Debug.Log("[QueueManager] Testing memory leak...");
-        
-        // Force cleanup
+
         CleanupAllCoroutines();
-        
-        // Check if any coroutines are still running
+
         if (matchLoopRoutine != null)
         {
             Debug.LogError("[QueueManager] MEMORY LEAK DETECTED! Coroutines not cleaned up properly!");
@@ -189,7 +181,6 @@ public class QueueManager : MonoBehaviour
                     var q = objs[i].GetComponent<QueueUnit>();
                     if (q != null)
                     {
-                        // Use SetIndexDirect for queue shifting to avoid grid pathfinding
                         q.SetIndexDirect(i);
                     }
                     else

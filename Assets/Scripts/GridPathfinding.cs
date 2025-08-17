@@ -18,6 +18,11 @@ public class GridPathfinding : MonoBehaviour
     public Color blockedCellColor = Color.red;
     public Color cellCenterColor = Color.yellow;
     
+    [Header("Obstacle Detection")]
+    public float rayHeight = 5f;
+    public LayerMask characterLayer = 1 << 8; // Character layer (8)
+    public bool useRayDetection = true;
+    
     [Header("Movement Settings")]
     public float moveSpeed = 3f;
     public float rotationSpeed = 5f;
@@ -50,6 +55,19 @@ public class GridPathfinding : MonoBehaviour
     
     void Start()
     {
+        // Set up character layer properly
+        int characterLayerIndex = LayerMask.NameToLayer("Character");
+        if (characterLayerIndex != -1)
+        {
+            characterLayer = 1 << characterLayerIndex;
+            Debug.Log($"[GridPathfinding] Character layer set to: {characterLayerIndex} (mask: {characterLayer})");
+        }
+        else
+        {
+            Debug.LogWarning("[GridPathfinding] Character layer not found! Using default layer 8");
+            characterLayer = 1 << 8;
+        }
+        
         InitializeGrid();
     }
     
@@ -65,8 +83,8 @@ public class GridPathfinding : MonoBehaviour
             {
                 Vector3 worldPoint = GetWorldPosition(x, z);
                 
-                // Make all cells walkable for now (for testing)
-                bool walkable = true;
+                // Check if cell is walkable using ray detection
+                bool walkable = CheckCellWalkability(worldPoint);
                 
                 grid[x, z] = new Node(x, z, worldPoint, walkable);
                 
@@ -75,6 +93,82 @@ public class GridPathfinding : MonoBehaviour
         }
         
         Debug.Log($"[GridPathfinding] Grid initialization completed");
+    }
+    
+    // Update walkability of a specific grid cell
+    public void UpdateCellWalkability(int x, int z)
+    {
+        if (x < 0 || x >= gridWidth || z < 0 || z >= gridHeight)
+            return;
+            
+        Vector3 worldPoint = GetWorldPosition(x, z);
+        bool walkable = CheckCellWalkability(worldPoint);
+        
+        if (grid[x, z].walkable != walkable)
+        {
+            grid[x, z].walkable = walkable;
+            Debug.Log($"[GridPathfinding] Updated cell ({x},{z}) walkability: {walkable}");
+        }
+    }
+    
+    // Update walkability of a cell at world position
+    public void UpdateCellWalkability(Vector3 worldPosition)
+    {
+        Vector2Int gridPos = GetGridPosition(worldPosition);
+        UpdateCellWalkability(gridPos.x, gridPos.y);
+    }
+    
+    // Refresh entire grid walkability
+    public void RefreshGridWalkability()
+    {
+        Debug.Log("[GridPathfinding] Refreshing grid walkability...");
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int z = 0; z < gridHeight; z++)
+            {
+                UpdateCellWalkability(x, z);
+            }
+        }
+        Debug.Log("[GridPathfinding] Grid walkability refresh completed");
+    }
+    
+    // Context menu for testing
+    [ContextMenu("Test Grid Walkability")]
+    void TestGridWalkability()
+    {
+        Debug.Log("[GridPathfinding] Testing grid walkability...");
+        Debug.Log($"Character layer mask: {characterLayer}");
+        Debug.Log($"Ray height: {rayHeight}");
+        Debug.Log($"Use ray detection: {useRayDetection}");
+        
+        if (grid != null)
+        {
+            int walkableCount = 0;
+            int blockedCount = 0;
+            
+            for (int x = 0; x < gridWidth; x++)
+            {
+                for (int z = 0; z < gridHeight; z++)
+                {
+                    if (grid[x, z].walkable)
+                        walkableCount++;
+                    else
+                        blockedCount++;
+                }
+            }
+            
+            Debug.Log($"Grid stats: {walkableCount} walkable, {blockedCount} blocked out of {gridWidth * gridHeight} total cells");
+        }
+        else
+        {
+            Debug.LogWarning("Grid is null!");
+        }
+    }
+    
+    [ContextMenu("Refresh Grid")]
+    void RefreshGrid()
+    {
+        RefreshGridWalkability();
     }
     
     // Convert grid coordinates to world position
@@ -94,6 +188,34 @@ public class GridPathfinding : MonoBehaviour
         z = Mathf.Clamp(z, 0, gridHeight - 1);
         
         return new Vector2Int(x, z);
+    }
+    
+    // Check if a grid cell is walkable using ray detection
+    bool CheckCellWalkability(Vector3 cellPosition)
+    {
+        if (!useRayDetection)
+        {
+            Debug.Log($"[GridPathfinding] Ray detection disabled for cell at {cellPosition}");
+            return true;
+        }
+            
+        // Cast ray upward from cell position
+        Vector3 rayStart = cellPosition;
+        Vector3 rayDirection = Vector3.up;
+        
+        Debug.Log($"[GridPathfinding] Checking cell at {cellPosition} with ray: {rayStart} -> {rayStart + rayDirection * rayHeight}");
+        Debug.Log($"[GridPathfinding] Character layer mask: {characterLayer}");
+        
+        // Check for Character layer objects
+        RaycastHit hit;
+        if (Physics.Raycast(rayStart, rayDirection, out hit, rayHeight, characterLayer))
+        {
+            Debug.Log($"[GridPathfinding] Cell at {cellPosition} BLOCKED by Character object: {hit.collider.gameObject.name} at layer {hit.collider.gameObject.layer}");
+            return false; // Cell is blocked
+        }
+        
+        Debug.Log($"[GridPathfinding] Cell at {cellPosition} is WALKABLE - no Character objects found");
+        return true; // Cell is walkable
     }
     
     // Get walkable neighbors of a node (only horizontal and vertical, no diagonal)
@@ -151,6 +273,19 @@ public class GridPathfinding : MonoBehaviour
             return null;
         }
         
+        // Check if start and target cells are walkable
+        if (!grid[startGrid.x, startGrid.y].walkable)
+        {
+            Debug.LogWarning($"[GridPathfinding] Start cell ({startGrid.x},{startGrid.y}) is not walkable!");
+            return null;
+        }
+        
+        if (!grid[targetGrid.x, targetGrid.y].walkable)
+        {
+            Debug.LogWarning($"[GridPathfinding] Target cell ({targetGrid.x},{targetGrid.y}) is not walkable!");
+            return null;
+        }
+        
         // Create a simple path: start -> intermediate grid cells -> target
         List<Vector3> path = new List<Vector3>();
         
@@ -167,6 +302,16 @@ public class GridPathfinding : MonoBehaviour
             if (currentX < targetGrid.x) currentX++;
             else currentX--;
             
+            // Check if this cell is walkable
+            if (currentX >= 0 && currentX < gridWidth && currentZ >= 0 && currentZ < gridHeight)
+            {
+                if (!grid[currentX, currentZ].walkable)
+                {
+                    Debug.LogWarning($"[GridPathfinding] Horizontal path blocked at ({currentX},{currentZ}) - cell is not walkable!");
+                    return null; // Path is blocked
+                }
+            }
+            
             Vector3 intermediatePos = GetWorldPosition(currentX, currentZ);
             path.Add(intermediatePos);
             Debug.Log($"[GridPathfinding] Added horizontal waypoint: ({currentX},{currentZ}) at {intermediatePos}");
@@ -177,6 +322,16 @@ public class GridPathfinding : MonoBehaviour
         {
             if (currentZ < targetGrid.y) currentZ++;
             else currentZ--;
+            
+            // Check if this cell is walkable
+            if (currentX >= 0 && currentX < gridWidth && currentZ >= 0 && currentZ < gridHeight)
+            {
+                if (!grid[currentX, currentZ].walkable)
+                {
+                    Debug.LogWarning($"[GridPathfinding] Vertical path blocked at ({currentX},{currentZ}) - cell is not walkable!");
+                    return null; // Path is blocked
+                }
+            }
             
             Vector3 intermediatePos = GetWorldPosition(currentX, currentZ);
             path.Add(intermediatePos);
@@ -330,6 +485,18 @@ public class GridPathfinding : MonoBehaviour
                         Gizmos.DrawSphere(cellCenter, 0.1f);
                     }
                     
+                    // Draw obstacle detection ray
+                    if (useRayDetection)
+                    {
+                        Gizmos.color = grid[x, z].walkable ? Color.green : Color.red;
+                        Vector3 rayStart = cellCenter;
+                        Vector3 rayEnd = rayStart + Vector3.up * rayHeight;
+                        Gizmos.DrawLine(rayStart, rayEnd);
+                        
+                        // Draw ray endpoint
+                        Gizmos.DrawSphere(rayEnd, 0.05f);
+                    }
+                    
                     // Draw cell coordinates for debugging
                     #if UNITY_EDITOR
                     if (showGridInfo)
@@ -387,5 +554,142 @@ public class GridPathfinding : MonoBehaviour
                 grid[x, z].walkable = walkable;
             }
         }
+    }
+
+    // Alternative pathfinding when direct path is blocked
+    public List<Vector3> FindAlternativePath(Vector3 startPos, Vector3 targetPos)
+    {
+        Debug.Log($"[GridPathfinding] Trying alternative pathfinding: {startPos} -> {targetPos}");
+        
+        Vector2Int startGrid = GetGridPosition(startPos);
+        Vector2Int targetGrid = GetGridPosition(targetPos);
+        
+        // Try different path strategies
+        List<Vector3> path = TryVerticalFirstPath(startGrid, targetGrid);
+        if (path != null)
+        {
+            path.Insert(0, startPos);
+            path.Add(targetPos);
+            Debug.Log($"[GridPathfinding] Alternative path found (vertical first) with {path.Count} waypoints");
+            return path;
+        }
+        
+        // If still no path, try to find any walkable path
+        path = FindAnyWalkablePath(startGrid, targetGrid);
+        if (path != null)
+        {
+            path.Insert(0, startPos);
+            path.Add(targetPos);
+            Debug.Log($"[GridPathfinding] Any walkable path found with {path.Count} waypoints");
+            return path;
+        }
+        
+        Debug.LogWarning($"[GridPathfinding] No alternative path found from {startPos} to {targetPos}");
+        return null;
+    }
+    
+    // Try vertical-first path
+    List<Vector3> TryVerticalFirstPath(Vector2Int start, Vector2Int target)
+    {
+        List<Vector3> path = new List<Vector3>();
+        int currentX = start.x;
+        int currentZ = start.y;
+        
+        // Move vertically first
+        while (currentZ != target.y)
+        {
+            if (currentZ < target.y) currentZ++;
+            else currentZ--;
+            
+            if (currentX >= 0 && currentX < gridWidth && currentZ >= 0 && currentZ < gridHeight)
+            {
+                if (!grid[currentX, currentZ].walkable)
+                {
+                    return null; // Path blocked
+                }
+            }
+            
+            path.Add(GetWorldPosition(currentX, currentZ));
+        }
+        
+        // Then move horizontally
+        while (currentX != target.x)
+        {
+            if (currentX < target.x) currentX++;
+            else currentX--;
+            
+            if (currentX >= 0 && currentX < gridWidth && currentZ >= 0 && currentZ < gridHeight)
+            {
+                if (!grid[currentX, currentZ].walkable)
+                {
+                    return null; // Path blocked
+                }
+            }
+            
+            path.Add(GetWorldPosition(currentX, currentZ));
+        }
+        
+        return path;
+    }
+    
+    // Find any walkable path using simple A* approach
+    List<Vector3> FindAnyWalkablePath(Vector2Int start, Vector2Int target)
+    {
+        // Simple flood fill approach
+        bool[,] visited = new bool[gridWidth, gridHeight];
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+        
+        queue.Enqueue(start);
+        visited[start.x, start.y] = true;
+        
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            
+            if (current == target)
+            {
+                // Reconstruct path
+                return ReconstructPath(cameFrom, start, target);
+            }
+            
+            // Check neighbors
+            int[] dx = { 0, 1, 0, -1 };
+            int[] dz = { -1, 0, 1, 0 };
+            
+            for (int i = 0; i < 4; i++)
+            {
+                int newX = current.x + dx[i];
+                int newZ = current.y + dz[i];
+                
+                if (newX >= 0 && newX < gridWidth && newZ >= 0 && newZ < gridHeight)
+                {
+                    if (!visited[newX, newZ] && grid[newX, newZ].walkable)
+                    {
+                        visited[newX, newZ] = true;
+                        queue.Enqueue(new Vector2Int(newX, newZ));
+                        cameFrom[new Vector2Int(newX, newZ)] = current;
+                    }
+                }
+            }
+        }
+        
+        return null; // No path found
+    }
+    
+    // Reconstruct path from cameFrom dictionary
+    List<Vector3> ReconstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int start, Vector2Int target)
+    {
+        List<Vector3> path = new List<Vector3>();
+        Vector2Int current = target;
+        
+        while (current != start)
+        {
+            path.Add(GetWorldPosition(current.x, current.y));
+            current = cameFrom[current];
+        }
+        
+        path.Reverse();
+        return path;
     }
 }

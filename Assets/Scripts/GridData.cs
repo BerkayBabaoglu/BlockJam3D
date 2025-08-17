@@ -89,8 +89,7 @@ public class GridData
        
         cells[x,z] = value;
     }
-    
-    // JSON serialization için
+
     public SerializableGrid ToSerializable()
     {
         SerializableGrid result = new SerializableGrid(cellsX, cellsZ);
