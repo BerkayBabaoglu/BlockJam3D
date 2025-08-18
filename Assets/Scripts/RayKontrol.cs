@@ -9,6 +9,18 @@ public class RayKontrol : MonoBehaviour
 
     public bool isMovementLocked { get; private set; }
     public Animator animator;
+    
+    [Header("Character6 Animation")]
+    private Character6AnimationController character6AnimController;
+
+    private void Start()
+    {
+        character6AnimController = GetComponent<Character6AnimationController>();
+        if (character6AnimController == null)
+        {
+            character6AnimController = GetComponentInChildren<Character6AnimationController>();
+        }
+    }
 
     private void Update()
     {
@@ -51,11 +63,18 @@ public class RayKontrol : MonoBehaviour
         {
             if (character6 != null) character6.SetActive(false);
             if (armature != null) armature.SetActive(true);
+            
+            if (character6AnimController != null)
+            {
+                character6AnimController.OnMovementStop();
+            }
         }
         else
         {
             if (armature != null) armature.SetActive(false);
             if (character6 != null) character6.SetActive(true);
+            
+
         }
     }
 

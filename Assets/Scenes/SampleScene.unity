@@ -1224,6 +1224,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1299642539}
     m_Modifications:
+    - target: {fileID: -806504930963155078, guid: 808fdd7ac92ab314c9e3e1518a513233, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5895743229650005541, guid: 808fdd7ac92ab314c9e3e1518a513233, type: 3}
       propertyPath: m_Name
       value: block 2 (339)
@@ -19286,6 +19290,11 @@ MonoBehaviour:
   walkableCellColor: {r: 0, g: 1, b: 0, a: 1}
   blockedCellColor: {r: 1, g: 0, b: 0, a: 1}
   cellCenterColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  rayHeight: 5
+  characterLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  useRayDetection: 1
   moveSpeed: 3
   rotationSpeed: 5
   stoppingDistance: 0.1

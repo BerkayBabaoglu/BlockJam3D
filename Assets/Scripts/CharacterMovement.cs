@@ -20,6 +20,8 @@ public class CharacterMovement : MonoBehaviour
     public string walkAnimationName = "walking";
     public string idleAnimationName = "idle";
     
+
+    
     private Vector3 targetPosition;
     private bool isMoving = false;
     private List<Vector3> currentPath;
@@ -42,6 +44,8 @@ public class CharacterMovement : MonoBehaviour
         {
             animator = GetComponent<Animator>();
         }
+        
+
         
         // Set initial position as target
         targetPosition = transform.position;
@@ -139,6 +143,9 @@ public class CharacterMovement : MonoBehaviour
     
     void UpdateAnimations()
     {
+
+        
+
         if (animator == null) return;
         
         // Set walking animation

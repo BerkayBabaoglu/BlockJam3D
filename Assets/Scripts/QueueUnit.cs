@@ -33,6 +33,10 @@ public class QueueUnit : MonoBehaviour
     private RayKontrol rayKontrol;
     private Animator animator;
     public bool IsMoving { get; private set; }
+    
+    [Header("Character6 Animation")]
+    private Character6AnimationController character6AnimController;
+    private bool isWalkingAnimation;
 
     private bool hasJoined = false;
     Coroutine moveRoutine;
@@ -52,7 +56,16 @@ public class QueueUnit : MonoBehaviour
         col = GetComponent<Collider>();
         rayKontrol = GetComponent<RayKontrol>();
         animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
         unitRenderer = GetComponent<Renderer>();
+        character6AnimController = GetComponent<Character6AnimationController>();
+        if (character6AnimController == null)
+        {
+            character6AnimController = GetComponentInChildren<Character6AnimationController>();
+        }
 
         if (useGridPathfinding)
         {
@@ -98,6 +111,13 @@ public class QueueUnit : MonoBehaviour
         else
         {
             Debug.Log($"[{gameObject.name}] Unit is selected - collision prevention handled by selection system");
+        }
+        
+        // Get character6 animation controller
+        character6AnimController = GetComponent<Character6AnimationController>();
+        if (character6AnimController == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] Character6AnimationController not found!");
         }
     }
     
@@ -395,6 +415,7 @@ public class QueueUnit : MonoBehaviour
                     isFollowingPath = true;
                     currentWaypointIndex = 0;
                     IsMoving = true;
+                    UpdateCharacter6Animation(true);
                     moveRoutine = StartCoroutine(MoveAlongGridPath(target));
                     return;
                 }
@@ -409,6 +430,7 @@ public class QueueUnit : MonoBehaviour
                         isFollowingPath = true;
                         currentWaypointIndex = 0;
                         IsMoving = true;
+                        UpdateCharacter6Animation(true);
                         moveRoutine = StartCoroutine(MoveAlongGridPath(target));
                         return;
                     }
@@ -420,6 +442,7 @@ public class QueueUnit : MonoBehaviour
             }
 
             IsMoving = true;
+            UpdateCharacter6Animation(true);
             Debug.Log($"[{gameObject.name}] Direct movement başlıyor (grid pathfinding disabled) - hedef: {target.name}");
             
             if (useSmoothMovement)
@@ -431,6 +454,7 @@ public class QueueUnit : MonoBehaviour
         {
             Debug.LogError($"[{gameObject.name}] QueueManager.Instance bulunamadı! SetIndex iptal edildi.");
             IsMoving = false;
+            UpdateCharacter6Animation(false);
         }
     }
 
@@ -456,6 +480,7 @@ public class QueueUnit : MonoBehaviour
             StopAllCoroutines();
 
             IsMoving = true;
+            UpdateCharacter6Animation(true);
             Debug.Log($"[{gameObject.name}] Direct movement başlıyor - hedef: {target.name}");
 
             moveRoutine = StartCoroutineSafe(MoveToSmoothDirect(target));
@@ -464,6 +489,7 @@ public class QueueUnit : MonoBehaviour
         {
             Debug.LogError($"[{gameObject.name}] QueueManager.Instance bulunamadı! SetIndexDirect iptal edildi.");
             IsMoving = false;
+            UpdateCharacter6Animation(false);
         }
     }
 
@@ -500,6 +526,7 @@ public class QueueUnit : MonoBehaviour
             if (positionLockRoutine != null) StopCoroutine(positionLockRoutine);
             positionLockRoutine = StartCoroutine(LockPosition());
             IsMoving = false;
+            UpdateCharacter6Animation(false);
         }
         else
         {
@@ -526,6 +553,7 @@ public class QueueUnit : MonoBehaviour
         if (moveRoutine != null) StopCoroutine(moveRoutine);
         moveRoutine = null;
         IsMoving = false;
+        UpdateCharacter6Animation(false);
 
         if (positionLockRoutine != null)
         {
@@ -558,6 +586,7 @@ public class QueueUnit : MonoBehaviour
         if (moveRoutine != null) StopCoroutine(moveRoutine);
         moveRoutine = null;
         IsMoving = false;
+        UpdateCharacter6Animation(false);
 
         if (positionLockRoutine != null)
         {
@@ -621,6 +650,10 @@ public class QueueUnit : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
             transform.position = Vector3.Lerp(startPos, targetPos, t);
+            
+            // Update character6 animation state during movement
+            UpdateCharacter6Animation(true);
+            
             yield return null;
         }
 
@@ -649,6 +682,9 @@ public class QueueUnit : MonoBehaviour
         
         
         IsMoving = false;
+        
+        // Update character6 animation state when movement stops
+        UpdateCharacter6Animation(false);
 
         useGridPathfinding = false;
         Debug.Log($"[{gameObject.name}] Grid pathfinding disabled - future movements will be direct queue-based");
@@ -686,6 +722,10 @@ public class QueueUnit : MonoBehaviour
         while ((transform.position - targetPos).sqrMagnitude > arrivalThreshold * arrivalThreshold)
         {
             transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            
+            // Update character6 animation state during movement
+            UpdateCharacter6Animation(true);
+            
             yield return null;
         }
 
@@ -707,6 +747,9 @@ public class QueueUnit : MonoBehaviour
 
         
         IsMoving = false;
+        
+        // Update character6 animation state when movement stops
+        UpdateCharacter6Animation(false);
 
         useGridPathfinding = false;
         Debug.Log($"[{gameObject.name}] Grid pathfinding disabled - future movements will be direct queue-based");
@@ -767,6 +810,9 @@ public class QueueUnit : MonoBehaviour
             Vector3 currentPosition = GetPositionAlongPath(progress, currentPath, target.position);
             transform.position = currentPosition;
             
+            // Update character6 animation state during movement
+            UpdateCharacter6Animation(true);
+            
             yield return null;
         }
 
@@ -795,6 +841,7 @@ public class QueueUnit : MonoBehaviour
         positionLockRoutine = StartCoroutine(LockPosition());
         
         IsMoving = false;
+        UpdateCharacter6Animation(false);
 
         useGridPathfinding = false;
         Debug.Log($"[{gameObject.name}] Grid pathfinding disabled - future movements will be direct queue-based");
@@ -891,6 +938,10 @@ public class QueueUnit : MonoBehaviour
             Vector3 newPosition = Vector3.Lerp(startPos, targetPos, t);
             newPosition.y = startPos.y; 
             transform.position = newPosition;
+            
+            // Update character6 animation state during movement
+            UpdateCharacter6Animation(true);
+            
             yield return null;
         }
 
@@ -945,6 +996,7 @@ public class QueueUnit : MonoBehaviour
         positionLockRoutine = StartCoroutine(LockPosition());
         
         IsMoving = false;
+        UpdateCharacter6Animation(false);
 
         useGridPathfinding = false;
         Debug.Log($"[{gameObject.name}] Grid pathfinding disabled - future movements will be direct queue-based");
@@ -1072,6 +1124,40 @@ public class QueueUnit : MonoBehaviour
         {
             Debug.Log($"  Rigidbody Detect Collisions: {rb.detectCollisions}");
             Debug.Log($"  Rigidbody Is Kinematic: {rb.isKinematic}");
+        }
+    }
+    
+    private void UpdateCharacter6Animation(bool isMoving)
+    {
+        if (character6AnimController != null)
+        {
+            if (isMoving)
+            {
+                character6AnimController.OnMovementStart();
+            }
+            else
+            {
+                character6AnimController.OnMovementStop();
+            }
+            return;
+        }
+
+        if (animator == null) return;
+        if (isMoving)
+        {
+            if (!isWalkingAnimation)
+            {
+                animator.SetTrigger("Walk");
+                isWalkingAnimation = true;
+            }
+        }
+        else
+        {
+            if (isWalkingAnimation)
+            {
+                animator.Play("idle");
+                isWalkingAnimation = false;
+            }
         }
     }
 }

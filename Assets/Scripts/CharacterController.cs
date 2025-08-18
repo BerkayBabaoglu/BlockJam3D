@@ -11,6 +11,8 @@ public class CharacterController : MonoBehaviour
     public GridPathfinding pathfinding;
     public LayerMask obstacleLayer = -1;
     
+
+    
     private Transform targetPoint;
     private bool isMoving = false;
     private int targetIndex = -1;
@@ -21,7 +23,6 @@ public class CharacterController : MonoBehaviour
 
     void Start()
     {
-
         if (pathfinding == null)
         {
             pathfinding = FindObjectOfType<GridPathfinding>();
@@ -30,6 +31,9 @@ public class CharacterController : MonoBehaviour
                 Debug.LogWarning("GridPathfinding not found! Character will move directly to target.");
             }
         }
+        
+        // Get character6 animation controller if not assigned
+
     }
 
     void Update()
@@ -77,7 +81,11 @@ public class CharacterController : MonoBehaviour
                 transform.SetParent(targetPoint);
                 isMoving = false;
                 CheckMatchAndClear();
+                
+
             }
+            
+
         }
     }
 
@@ -188,6 +196,8 @@ public class CharacterController : MonoBehaviour
                 currentPath = null;
                 currentWaypointIndex = 0;
                 isMoving = true;
+                
+
 
                 return;
             }
@@ -208,6 +218,8 @@ public class CharacterController : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
         }
+        
+
     }
 
     int FindInsertIndexForColor(string color)
@@ -358,4 +370,6 @@ public class CharacterController : MonoBehaviour
             }
         }
     }
+    
+
 }
