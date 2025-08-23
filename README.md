@@ -60,6 +60,9 @@ You can reach me here: [LinkedIn](https://www.linkedin.com/in/berkaybabaoglu01/)
 ## 📸 Screenshots
 
 
+https://github.com/user-attachments/assets/e038c3e5-26cf-4f3e-be79-8f341de42337
+
+
 https://github.com/user-attachments/assets/0249f337-3857-4247-9a4e-95175d688027
 
 
