@@ -294,8 +294,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorCode: M
   moveSpeed: 50
+  rotationSpeed: 30
   arrivalThreshold: 0.01
   useSmoothMovement: 1
+  modelForwardOffsetY: 180
+  faceFinalTargetDirection: 1
   useGridPathfinding: 1
   isSelected: 0
   selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

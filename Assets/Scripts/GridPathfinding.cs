@@ -449,13 +449,13 @@ public class GridPathfinding : MonoBehaviour
         Gizmos.DrawWireCube(gridCenter, gridSize);
         
         // Draw grid info text (for debugging)
-        #if UNITY_EDITOR
-        if (showGridInfo)
-        {
-            UnityEditor.Handles.Label(gridCenter + Vector3.up * 2f, 
-                $"Pathfinding Grid: {gridWidth}x{gridHeight}\nCell Size: {cellSize:F2}\nTotal Size: {gridSize.x:F1}x{gridSize.z:F1}\nOrigin: {gridOrigin}");
-        }
-        #endif
+        //#if UNITY_EDITOR
+        //if (showGridInfo)
+        //{
+        //    UnityEditor.Handles.Label(gridCenter + Vector3.up * 2f, 
+        //        $"Pathfinding Grid: {gridWidth}x{gridHeight}\nCell Size: {cellSize:F2}\nTotal Size: {gridSize.x:F1}x{gridSize.z:F1}\nOrigin: {gridOrigin}");
+        //}
+        //#endif
         
         // Draw grid cells and centers
         if (grid != null)

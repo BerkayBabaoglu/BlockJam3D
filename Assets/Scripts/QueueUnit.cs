@@ -10,8 +10,13 @@ public class QueueUnit : MonoBehaviour
 
     [Header("Movement Settings")]
     public float moveSpeed = 8f;
+    public float rotationSpeed = 10f;
     public float arrivalThreshold = 0.01f;
     public bool useSmoothMovement = true;
+    
+    [Header("Facing Settings")]
+    public float modelForwardOffsetY = 0f; // Set 180 if model looks backwards in authoring
+    public bool faceFinalTargetDirection = true;
     
     [Header("Pathfinding Settings")]
     public bool useGridPathfinding = true;
@@ -649,7 +654,18 @@ public class QueueUnit : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
-            transform.position = Vector3.Lerp(startPos, targetPos, t);
+            Vector3 nextPosSmooth = Vector3.Lerp(startPos, targetPos, t);
+            Vector3 toTargetSmooth = nextPosSmooth - transform.position;
+            toTargetSmooth.y = 0f;
+            if (toTargetSmooth.sqrMagnitude > 0.0001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(toTargetSmooth);
+                Vector3 e = targetRot.eulerAngles;
+                e.y += modelForwardOffsetY;
+                targetRot = Quaternion.Euler(e);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
+            transform.position = nextPosSmooth;
             
             // Update character6 animation state during movement
             UpdateCharacter6Animation(true);
@@ -721,7 +737,18 @@ public class QueueUnit : MonoBehaviour
         
         while ((transform.position - targetPos).sqrMagnitude > arrivalThreshold * arrivalThreshold)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            Vector3 nextPos = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            Vector3 toTarget = nextPos - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > 0.0001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(toTarget);
+                Vector3 e = targetRot.eulerAngles;
+                e.y += modelForwardOffsetY;
+                targetRot = Quaternion.Euler(e);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
+            transform.position = nextPos;
             
             // Update character6 animation state during movement
             UpdateCharacter6Animation(true);
@@ -808,6 +835,16 @@ public class QueueUnit : MonoBehaviour
             float progress = elapsedTime / totalDuration;
 
             Vector3 currentPosition = GetPositionAlongPath(progress, currentPath, target.position);
+            Vector3 toNext = currentPosition - transform.position;
+            toNext.y = 0f;
+            if (toNext.sqrMagnitude > 0.0001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(toNext);
+                Vector3 e = targetRot.eulerAngles;
+                e.y += modelForwardOffsetY;
+                targetRot = Quaternion.Euler(e);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
             transform.position = currentPosition;
             
             // Update character6 animation state during movement
@@ -937,6 +974,16 @@ public class QueueUnit : MonoBehaviour
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
             Vector3 newPosition = Vector3.Lerp(startPos, targetPos, t);
             newPosition.y = startPos.y; 
+            Vector3 toNextDir = newPosition - transform.position;
+            toNextDir.y = 0f;
+            if (toNextDir.sqrMagnitude > 0.0001f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(toNextDir);
+                Vector3 e = targetRot.eulerAngles;
+                e.y += modelForwardOffsetY;
+                targetRot = Quaternion.Euler(e);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
             transform.position = newPosition;
             
             // Update character6 animation state during movement
